@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"moduleResolution": "Node",
+		"allowSyntheticDefaultImports": true,
+		"noImplicitAny": true,
+		"module": "es6",
+		"target": "es6",
+		"allowJs": false,
+		"skipLibCheck": true,
+		"jsx": "react-jsx",
+		"baseUrl": ".",
+		"paths": {
+			"src/*": ["./src/*"],
+			"public/*": ["./public/*"]
+		},
+		"typeRoots": ["./node_modules/@types", "./src/@types"]
+	},
+	"include": ["./src", "./public"],
+	"exclude": ["./node_modules", "./dist"]
+}
