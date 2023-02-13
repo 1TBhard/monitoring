@@ -31,7 +31,13 @@ export const OPEN_API = {
 // WARN: DO NOT CHANGE
 const JSON = "json";
 
+const baseURL = `/${API}/${JSON}`;
+
 export const API_URL = {
-	SPOT: `/${API}/${JSON}/spot`,
-	AGENT: `/${API}/${JSON}/agents`,
+	SPOT: `${baseURL}/spot`,
+	AGENT: `${baseURL}/agents`,
+	PROJECT: {
+		INFO: `${baseURL}/projects`,
+		MEMBER_LIST: `${baseURL}/project/:projectCode/members`,
+	},
 } as const;
