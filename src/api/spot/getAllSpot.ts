@@ -25,7 +25,7 @@ export interface ResGetAllSpot {
 	act_socket: "0";
 }
 
-export default function getAllSpot() {
+export default async function getAllSpot() {
 	const url = API_URL.SPOT;
 
 	return openWhatapAPI.get<ResGetAllSpot>(url);
