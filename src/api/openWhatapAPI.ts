@@ -22,7 +22,7 @@ openWhatapAPI.interceptors.request.use(
 );
 
 openWhatapAPI.interceptors.response.use(
-	(response) => response,
+	(response) => response.data,
 	(error) =>
 		Promise.reject(
 			new CustomError({

@@ -5,5 +5,5 @@ import Project from "src/type/Project";
 export default async function getProject() {
 	const url = API_URL.PROJECT.INFO;
 
-	return openWhatapAPI.get<Project>(url);
+	return openWhatapAPI.get<unknown, Project>(url);
 }

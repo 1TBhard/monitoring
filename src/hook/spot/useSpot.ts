@@ -20,27 +20,26 @@ export default function useSpot() {
 			{
 				subTitle: "총 에이전트",
 				Indicator:
-					Number(data?.data.act_agent ?? 0) +
-					Number(data?.data.inact_agent ?? 0),
+					Number(data?.act_agent ?? 0) + Number(data?.inact_agent ?? 0),
 			},
 			{
 				subTitle: "비활성화 에이전트",
-				Indicator: data?.data.inact_agent ?? 0,
+				Indicator: data?.inact_agent ?? 0,
 			},
 			{
 				subTitle: "CPU 코어",
-				Indicator: data?.data.cpucore ?? 0,
+				Indicator: data?.cpucore ?? 0,
 			},
 			{
 				subTitle: "호스트",
-				Indicator: data?.data.host ?? 0,
+				Indicator: data?.host ?? 0,
 			},
 		],
 		[data]
 	);
 
 	return {
-		spot: data?.data,
+		spot: data,
 		spotItemList,
 		isLoading,
 	};

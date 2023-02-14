@@ -17,10 +17,10 @@ export default function useProject() {
 	});
 
 	return {
-		project: data?.data,
-		projectName: data?.data.name ?? "없음",
-		status: data?.data.status,
-		platform: data?.data.platform,
+		project: data,
+		projectName: data?.name ?? "없음",
+		status: data?.status,
+		platform: data?.platform,
 		isLoading,
 	};
 }
