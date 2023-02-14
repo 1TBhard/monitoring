@@ -37,7 +37,7 @@ export const API_URL = {
 	SPOT: `${baseURL}/spot`,
 	AGENT: `${baseURL}/agents`,
 	PROJECT: {
-		INFO: `${baseURL}/projects`,
+		INFO: `${baseURL}/project`,
 		MEMBER_LIST: `${baseURL}/project/:projectCode/members`,
 	},
 } as const;
