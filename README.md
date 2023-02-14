@@ -1,33 +1,90 @@
-# 소개
+# Monitoring
 
-와탭랩스는 클라우드 모니터링 플랫폼 서비스를 제공합니다. 프론트엔드 개발자는 모니터링 데이터를 시각화하여 위험 감지와 장애 분석을 돕는 화면을 만드는 일을 담당합니다. 
+## 소개
 
-이 중 실시간 대시보드는 위험 감지를 위한 가장 기본적인 서비스로, 프론트엔드 개발자의 주 작업 대상입니다. 
+와탭랩스의 OpenAPI를 이용한 모니터링 페이지입니다.
 
-# 프로젝트
+## 설치 및 실행환경
 
-## Open API를 활용한 대시보드 구현
+- 실행환경
+  - node: 16 이상
+  - yarn: 1.22 이상
 
-와탭 Open API를 활용하여 애플리케이션 모니터링을 위한 대시보드 화면을 제작합니다.
+- 설치
 
-- **세부적인 과제 내용은 별도 제공합니다.*
+```cmd
+yarn install
+```
 
-- Open API에 대한 자세한 설명은 [Open API GUIDE](https://docs.whatap.io/kr/appendix/open_api_application.html#empty)를 참고하세요. 
+- 실행
 
-- 실제 서비스 화면을 둘러보고 싶으시다면, [와탭 홈페이지](https://www.whatap.io/ko/)에서 이메일 입력 후 데모를 시작할 수 있습니다. 
+```cmd
+yarn start
+```
 
-![application_monitoring](./public/application_dashboard.png)
+## 과제 요구 사항
 
-![server_monitoring](./public/server_dashboard.png)
+- 데이터 요청
+  - [ ] Endpoint를 기준으로 10개 이상의 Open API를 사용하여 대시보드를 구성합니다.
+  - [ ] 실시간 : 5초 주기로 데이터를 갱신합니다.
 
-![container_monitoring](./public/container_dashboard.png)
+- 컴포넌트 제작
+  - [x] 1개 이상의 인포매틱스 위젯 (지표 이름과 값을 단순 텍스트 형식으로 표시하는 위
+젯)
+  - [ ] 1개 이상의 막대 차트 위젯
+  - [ ] 1개 이상의 라인 차트 위젯
+  - [ ] 화면 크기에 대한 반응형 레이아웃 스타일을 적용합니다.
+
+## 제약 조건
+
+- [x] 리액트 라이브러리를 사용합니다.
+- [x] 타입스크립트를 사용합니다.
+
+## 사용한 프레임워크 및 라이브러리
+
+사용 패키지는 아래와 같습니다.
+
+- react
+  - 재사용성이 극대화 됩니다.
+- react-scripts
+  - react 프로젝트 구성시 간단히 할 수 있어 사용하였습니다.
+- typescript
+  - 정적 타입 검사 등의 많은 이점을 가지고 있어 사용하였습니다.
+- react-query
+  - 비동기 통신을 위한 isLaoding 등 상태 관리에 편한 헬퍼 함수들을 제공하여 사용하였습니다.
+- eslint, prettier
+  - 코드 켄벤션을 통일화하고자 이를 사용하였습니다.
+  - 다른 동료들과 프로젝트 수행을 한다는 것을 예정으로 사용했습니다.
+- antd
+  - 컴포넌트를 빠르게 구축게 구축하고자 사용하였습니다.
+- styled-components
+  - CSS-in-JS 를 활용하여 스타일 요소도 재사용성을 극대화하고자 사용하였습니다.
+
+## 폴더 구조
+
+```txt
+src
+  ├── api
+  ├── component
+  ├── const
+  ├── hook
+  ├── page
+  ├── style
+  ├── type
+  └── util
+```
+
+폴더|설명
+:--:|:--
+api | api 관련 함수들이 있는 폴더
+component | - 컴포넌트들이 있는 폴더 <br/> - 공통 컴포넌트는 `common`의 하위에 위치 <br/> - 그 외 컴포넌트는 `main`의 하위로 위치
+constant | 상수들이 모여 있는 폴더
+hook | hook 이 모여 있는 폴더
+page | 페이지들이 모여 있는 폴더
+style | 스타일 관련 파일(폰트 크기, 색상)들이 있는 폴더 
+type | 타입들이 모여 있는 폴더
+util | 유틸리티 관련 함수들이 모인 폴더
 
 
+## 주안점
 
-## 이슈 사항
-
-- 브라우져 CORS 정책에 따라 WhaTap Open API 사용이 제한될 경우 [Run Chrome browser without CORS](https://alfilatov.com/posts/run-chrome-without-cors/)에서 문제를 해결할 수 있습니다.
-
----
-
-이 프로젝트는 [Create React App](https://github.com/facebook/create-react-app)을 사용하여 만들었습니다. 
