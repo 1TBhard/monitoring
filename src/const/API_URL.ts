@@ -28,9 +28,7 @@ export const OPEN_API = {
 	},
 } as const;
 
-// WARN: DO NOT CHANGE
 const JSON = "json";
-
 const baseURL = `/${API}/${JSON}`;
 
 export const API_URL = {
@@ -39,5 +37,9 @@ export const API_URL = {
 	PROJECT: {
 		INFO: `${baseURL}/project`,
 		MEMBER_LIST: `${baseURL}/project/:projectCode/members`,
+	},
+	STATISTICS: {
+		EXCEPTION: `${baseURL}/exception/:stime/:etime`,
+		ACTIVE_USER_BY_HOUR: `${baseURL}/visitor_h/:stime/:etime`,
 	},
 } as const;
