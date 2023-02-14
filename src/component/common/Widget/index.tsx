@@ -1,15 +1,17 @@
-import { Skeleton } from "antd";
-import { PropsWithChildren } from "react";
-import FlexBox from "src/component/common/FlexBox";
 import * as Styled from "./Styled.Widget";
+import FlexBox from "src/component/common/FlexBox";
+import { Popover, Skeleton } from "antd";
+import { PropsWithChildren, ReactNode } from "react";
 
 interface WidgetProps {
 	title: string;
+	description?: ReactNode;
 	isLoading?: boolean;
 }
 
 export default function Widget({
 	title,
+	description,
 	isLoading = false,
 	children,
 }: PropsWithChildren<WidgetProps>) {
@@ -18,7 +20,11 @@ export default function Widget({
 			<Styled.Header>
 				<FlexBox>
 					<Styled.Title>{title}</Styled.Title>
-					<Styled.TitleInfoIcon />
+					{description && (
+						<Popover placement='left' title={title} content={description}>
+							<Styled.TitleInfoIcon />
+						</Popover>
+					)}
 				</FlexBox>
 			</Styled.Header>
 
