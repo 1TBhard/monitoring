@@ -20,6 +20,7 @@ export default function useActiveUserByHour({
 		cacheTime: QUERY_COMMON.CACHE_TIME,
 		retry: QUERY_COMMON.RETRY,
 		retryDelay: QUERY_COMMON.RETRY_DELAY,
+		refetchInterval: QUERY_COMMON.REFETCH_INTERVAL,
 	});
 
 	return {

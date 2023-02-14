@@ -13,6 +13,7 @@ export default function useSpot() {
 		cacheTime: QUERY_COMMON.CACHE_TIME,
 		retry: QUERY_COMMON.RETRY,
 		retryDelay: QUERY_COMMON.RETRY_DELAY,
+		refetchInterval: QUERY_COMMON.REFETCH_INTERVAL,
 	});
 
 	const spotItemList = useMemo<InfomaticWidgetProps["itemList"]>(
