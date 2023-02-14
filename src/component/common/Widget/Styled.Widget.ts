@@ -9,13 +9,18 @@ export const Frame = styled.div`
 	background-color: #fff;
 `;
 
-export const Header = styled.div``;
+export const Header = styled.div`
+	margin-bottom: 20px;
+`;
 
 export const Title = styled.h3`
 	font-size: ${FONT_SIZE.TITLE};
 	font-weight: bold;
+	margin: 0;
 `;
 
-export const TitleInfoIcon = styled(InfoCircleOutlined)``;
+export const TitleInfoIcon = styled(InfoCircleOutlined)`
+	font-size: ${FONT_SIZE.TITLE};
+`;
 
 export const Body = styled.div``;
