@@ -11,10 +11,12 @@ export const Frame = styled.div`
 
 export const Header = styled.div`
 	margin-bottom: 20px;
+	display: flex;
+	justify-content: space-between;
+	font-size: ${FONT_SIZE.TITLE};
 `;
 
 export const Title = styled.h3`
-	font-size: ${FONT_SIZE.TITLE};
 	font-weight: bold;
 	margin: 0;
 `;

@@ -7,6 +7,7 @@ interface WidgetProps {
 	title: string;
 	description?: ReactNode;
 	isLoading?: boolean;
+	controlComponent?: ReactNode;
 }
 
 export default function Widget({
@@ -14,6 +15,7 @@ export default function Widget({
 	description,
 	isLoading = false,
 	children,
+	controlComponent,
 }: PropsWithChildren<WidgetProps>) {
 	return (
 		<Styled.Frame>
@@ -26,6 +28,8 @@ export default function Widget({
 						</Popover>
 					)}
 				</FlexBox>
+
+				{controlComponent && <FlexBox>{controlComponent}</FlexBox>}
 			</Styled.Header>
 
 			<Styled.Body>{isLoading ? <Skeleton active /> : children}</Styled.Body>
