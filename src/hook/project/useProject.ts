@@ -15,7 +15,7 @@ export default function useProject() {
 
 	return {
 		project: data,
-		projectName: data?.name ?? "없음",
+		projectName: `${data?.name} 대시보드` ?? "없음",
 		status: data?.status,
 		platform: data?.platform,
 		isLoading,
