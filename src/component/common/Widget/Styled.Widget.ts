@@ -7,6 +7,8 @@ export const Frame = styled.div`
 	display: flex;
 	flex-direction: column;
 	background-color: #fff;
+	border-radius: 15px;
+	box-shadow: 10px 10px 30px -15px rgba(0, 0, 0, 0.75);
 `;
 
 export const Header = styled.div`
@@ -19,10 +21,11 @@ export const Header = styled.div`
 export const Title = styled.h3`
 	font-weight: bold;
 	margin: 0;
+	font-size: inherit;
 `;
 
 export const TitleInfoIcon = styled(InfoCircleOutlined)`
-	font-size: ${FONT_SIZE.TITLE};
+	font-size: inherit;
 `;
 
 export const Body = styled.div``;
