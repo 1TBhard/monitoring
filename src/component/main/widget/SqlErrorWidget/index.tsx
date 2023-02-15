@@ -84,6 +84,7 @@ export default function SqlErrorWidget({ stime, etime }: SqlErrorWidgetProps) {
 				open={isShowDrawer}
 				title='금일 SQL 에러 상세'
 				onClose={onClose}
+				destroyOnClose={true}
 			>
 				<ResponsiveTable columns={columns} dataSource={allSqlStatistics} />
 			</CustomDrawer>
