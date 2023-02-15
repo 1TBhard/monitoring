@@ -14,7 +14,7 @@ export default function ErrorWrapper({
 	return (
 		<Spin
 			spinning={isError}
-			indicator={undefined}
+			indicator={<></>}
 			tip={errorMessage}
 			{...restProps}
 		/>
