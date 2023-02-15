@@ -1,7 +1,7 @@
 const FONT_SIZE = {
-	TITLE: "24px",
-	DEFAULT: "16px",
-	EMPHASIS: "18px",
+	TITLE: "20px",
+	DEFAULT: "14px",
+	EMPHASIS: "16px",
 } as const;
 
 export default FONT_SIZE;
