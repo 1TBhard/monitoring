@@ -1,5 +1,5 @@
 export const QUERY_COMMON = {
-	RETRY: 5,
+	RETRY: 0,
 	RETRY_DELAY: 5000, // ms
 	STALE_TIME: 4000,
 	CACHE_TIME: 30 * 1000, // 30분,

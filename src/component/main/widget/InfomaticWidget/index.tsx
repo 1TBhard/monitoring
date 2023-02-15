@@ -1,23 +1,19 @@
 import Widget from "src/component/common/Widget";
+import InfomaticWidgetContent from "src/component/main/widget/InfomaticWidget/InfomaticWidgetContent";
+import useSpot from "src/hook/spot/useSpot";
 import * as Styled from "./Styled.InfomaticWidget";
 
-export interface InfomaticWidgetProps {
-	itemList: {
-		subTitle: string;
-		Indicator: number;
-	}[];
-}
+export default function InfomaticWidget() {
+	const { spotItemList, isLoading, isError } = useSpot();
 
-export default function InfomaticWidget({ itemList }: InfomaticWidgetProps) {
 	return (
 		<Widget title='인포매틱스'>
 			<Styled.Frame>
-				{itemList.map((item, index) => (
-					<Styled.Item key={`${item.subTitle}-${index}`}>
-						<Styled.SubTitle>{item.subTitle}</Styled.SubTitle>
-						<Styled.Indicator>{item.Indicator}</Styled.Indicator>
-					</Styled.Item>
-				))}
+				<InfomaticWidgetContent
+					spotItemList={spotItemList}
+					isLoading={isLoading}
+					isError={isError}
+				/>
 			</Styled.Frame>
 		</Widget>
 	);

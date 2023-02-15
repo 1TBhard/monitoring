@@ -1,27 +1,22 @@
-import { Line, LineConfig } from "@ant-design/charts";
-import Widget from "src/component/common/Widget";
 import useActiveUserByHour from "src/hook/statistics/useActiveUserByHour";
+import UtilDate from "src/util/UtilDate";
+import Widget from "src/component/common/Widget";
+import ActiveUserWidgetContent from "src/component/main/widget/ActiveUserWidget/ActiveUserWidgetContent";
 
-interface ActiveUserWidgetProps {
-	activeUserList: ReturnType<typeof useActiveUserByHour>["activeUserList"];
-}
-
-export default function ActiveUserWidget({
-	activeUserList,
-}: ActiveUserWidgetProps) {
-	const config: LineConfig = {
-		data: activeUserList,
-		padding: "auto",
-		xField: "date",
-		yField: "activeUser",
-		xAxis: {
-			tickCount: activeUserList.length,
-		},
-	};
+export default function ActiveUserWidget() {
+	const { stime, etime } = UtilDate.getTodayStimeEtime();
+	const { activeUserList, isLoading, isError } = useActiveUserByHour({
+		stime,
+		etime,
+	});
 
 	return (
 		<Widget title='금일 사용자'>
-			<Line {...config} />
+			<ActiveUserWidgetContent
+				activeUserList={activeUserList}
+				isLoading={isLoading}
+				isError={isError}
+			/>
 		</Widget>
 	);
 }

@@ -13,7 +13,7 @@ export default function useActiveUserByHour({
 	stime,
 	etime,
 }: UseActiveUserByHourParams) {
-	const { data, isLoading } = useQuery({
+	const { data, isLoading, isError } = useQuery({
 		queryFn: () => getActiveUserByHour({ stime, etime }),
 		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.ACTIVE_USER, stime, etime],
 		staleTime: QUERY_COMMON.STALE_TIME,
@@ -21,6 +21,7 @@ export default function useActiveUserByHour({
 		retry: QUERY_COMMON.RETRY,
 		retryDelay: QUERY_COMMON.RETRY_DELAY,
 		refetchInterval: QUERY_COMMON.REFETCH_INTERVAL,
+		notifyOnChangeProps: ["data", "error"],
 	});
 
 	return {
@@ -30,5 +31,6 @@ export default function useActiveUserByHour({
 				activeUser: d[1],
 			})) ?? [],
 		isLoading,
+		isError,
 	};
 }

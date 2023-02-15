@@ -6,4 +6,11 @@ export default class UtilDate {
 
 		return day.format("HH:mm");
 	}
+
+	static getTodayStimeEtime() {
+		const stime = dayjs().startOf("day").toDate().getTime();
+		const etime = dayjs().endOf("day").toDate().getTime();
+
+		return { stime, etime };
+	}
 }

@@ -2,11 +2,11 @@ import getSpot from "src/api/spot/getSpot";
 import { QUERY_COMMON } from "src/const/QUERY_CONST";
 import { QUERY_KEY } from "src/hook/store";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { InfomaticWidgetProps } from "src/component/main/widget/InfomaticWidget";
+
+export type UseSpotReturn = ReturnType<typeof useSpot>;
 
 export default function useSpot() {
-	const { data, isLoading } = useQuery({
+	const { data, isError, isLoading } = useQuery({
 		queryFn: getSpot,
 		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SPOT],
 		staleTime: QUERY_COMMON.STALE_TIME,
@@ -14,34 +14,32 @@ export default function useSpot() {
 		retry: QUERY_COMMON.RETRY,
 		retryDelay: QUERY_COMMON.RETRY_DELAY,
 		refetchInterval: QUERY_COMMON.REFETCH_INTERVAL,
+		notifyOnChangeProps: ["data", "error"],
 	});
 
-	const spotItemList = useMemo<InfomaticWidgetProps["itemList"]>(
-		() => [
-			{
-				subTitle: "총 에이전트",
-				Indicator:
-					Number(data?.act_agent ?? 0) + Number(data?.inact_agent ?? 0),
-			},
-			{
-				subTitle: "비활성화 에이전트",
-				Indicator: data?.inact_agent ?? 0,
-			},
-			{
-				subTitle: "CPU 코어",
-				Indicator: data?.cpucore ?? 0,
-			},
-			{
-				subTitle: "호스트",
-				Indicator: data?.host ?? 0,
-			},
-		],
-		[data]
-	);
+	const spotItemList = [
+		{
+			subTitle: "총 에이전트",
+			Indicator: Number(data?.act_agent ?? 0) + Number(data?.inact_agent ?? 0),
+		},
+		{
+			subTitle: "비활성화 에이전트",
+			Indicator: data?.inact_agent ?? 0,
+		},
+		{
+			subTitle: "CPU 코어",
+			Indicator: data?.cpucore ?? 0,
+		},
+		{
+			subTitle: "호스트",
+			Indicator: data?.host ?? 0,
+		},
+	];
 
 	return {
 		spot: data,
 		spotItemList,
 		isLoading,
+		isError,
 	};
 }
