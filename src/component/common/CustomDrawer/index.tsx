@@ -1,6 +1,7 @@
 import { Drawer, DrawerProps } from "antd";
 
-interface CustomDrawerProps extends Omit<DrawerProps, "title" | "onClose"> {
+export interface CustomDrawerProps
+	extends Omit<DrawerProps, "title" | "onClose"> {
 	title?: string;
 	onClose: DrawerProps["onClose"];
 }
