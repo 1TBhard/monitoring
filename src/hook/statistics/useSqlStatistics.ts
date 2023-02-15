@@ -12,7 +12,7 @@ interface UseExceptionParams {
 }
 
 export default function useSqlStatistics({ stime, etime }: UseExceptionParams) {
-	const { data, isLoading } = useQuery({
+	const { data, isLoading, isError } = useQuery({
 		queryFn: () => getSqlStatistics({ stime, etime }),
 		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SQL, stime, etime],
 		staleTime: QUERY_COMMON.STALE_TIME,
@@ -20,6 +20,7 @@ export default function useSqlStatistics({ stime, etime }: UseExceptionParams) {
 		retry: QUERY_COMMON.RETRY,
 		retryDelay: QUERY_COMMON.RETRY_DELAY,
 		refetchInterval: QUERY_COMMON.REFETCH_INTERVAL,
+		notifyOnChangeProps: ["data", "error"],
 	});
 
 	const topSqlErrorStatistics =
@@ -44,5 +45,6 @@ export default function useSqlStatistics({ stime, etime }: UseExceptionParams) {
 		totalError,
 		totalService: data?.records ?? 0,
 		isLoading,
+		isError,
 	};
 }
