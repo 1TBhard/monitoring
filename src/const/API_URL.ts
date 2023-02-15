@@ -41,5 +41,6 @@ export const API_URL = {
 	STATISTICS: {
 		EXCEPTION: `${baseURL}/exception/:stime/:etime`,
 		ACTIVE_USER_BY_HOUR: `${baseURL}/visitor_h/:stime/:etime`,
+		SQL: `${baseURL}/sql/:stime/:etime`,
 	},
 } as const;
