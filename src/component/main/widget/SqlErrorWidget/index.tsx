@@ -5,6 +5,7 @@ import useSqlStatistics from "src/hook/statistics/useSqlStatistics";
 import UtilDate from "src/util/UtilDate";
 import Widget from "src/component/common/Widget";
 import { useCallback, useState } from "react";
+import { DESCRIPTION } from "src/const/MESSAGE";
 
 export default function SqlErrorWidget() {
 	const { stime, etime } = UtilDate.getTodayStimeEtime();
@@ -25,7 +26,10 @@ export default function SqlErrorWidget() {
 				title='금일 SQL 에러'
 				description='금일 발생한 가장 많이 SQL 에러가 발생한 상위 5개의 서비스를 보여줍니다.'
 				controlComponent={
-					<MoreInfoButton onClick={() => setIsShowDrawer(true)} />
+					<MoreInfoButton
+						description={DESCRIPTION.MORE_INFO_BUTTON}
+						onClick={() => setIsShowDrawer(true)}
+					/>
 				}
 			>
 				<SqlErrorBarChart
