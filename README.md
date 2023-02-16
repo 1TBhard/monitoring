@@ -17,7 +17,7 @@
       - [2-1. cache를 이용한다](#2-1-cache를-이용한다)
       - [2-2 데이터와 컴포넌트 로직을 분리한다](#2-2-데이터와-컴포넌트-로직을-분리한다)
     - [3. 유지보수에 힘쓰기 🤝](#3-유지보수에-힘쓰기-)
-    - [4. 리버스 프록시로 CORS 해결](#4-리버스-프록시로-cors-해결)
+    - [4. 리버스 프록시로 CORS 해결 🛠](#4-리버스-프록시로-cors-해결-)
 
 <br/>
 
@@ -165,7 +165,7 @@ export default function useActiveUserByHour({
 }: UseActiveUserByHourParams) {
   // staleTime과 cacheTime을 설정하여 캐시의 refresh 주기를 맞춘다.
   // refetchInterval 로 연속적으로 데이터를 가져온다.
-  // notifyOnChangeProps 이용하여 "data", "error" 값이 변햤음을 알린다.
+  // notifyOnChangeProps 이용하여 "data", "error" 값이 이전과 변경된 경우 데이터가 변경됨을 알린다.
   const { data, isLoading, isError } = useQuery({
     queryFn: () => getActiveUserByHour({ stime, etime }),
     queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.ACTIVE_USER, stime, etime],
@@ -226,7 +226,7 @@ src
         ├── API_URL.ts
         ├── MESSAGE.ts
         ├── PROXY_API_URL.ts
-        ├── QUERY_CONST
+        ├── QUERY_CONST.ts
         └── STATISTICS.ts
 ```
 
@@ -236,7 +236,7 @@ src
   <img src="./public/semanticCommit.png" />
 </p>
 
-### 4. 리버스 프록시로 CORS 해결
+### 4. 리버스 프록시로 CORS 해결 🛠
 
 과제 가이드 문서에는 [CORS 해결법](https://alfilatov.com/posts/run-chrome-without-cors/)이 있었는데요.  
 해당 방법으로 문제를 해결할 경우 PC가 달라질때 마다 다시 재설정을 해주어야한다는 번거러움이 있었습니다.  
