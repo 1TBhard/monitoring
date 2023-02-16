@@ -193,7 +193,7 @@ export default function useActiveUserByHour({
 
 데이터와 컴포넌트 로직이 하나로 묶여있는 경우, 유지보수가 힘듦을 경험하였습니다.  
 이에 데이터와 컴포넌트 로직을 분리하고자 하였습니다.  
-또한, `React.memo`를 사용하여 렌더링만되는 컴포넌트들을 메모이징한다.
+또한, `React.memo`를 사용하여 렌더링만되는 컴포넌트들을 메모이징하였습니다.
 
 ```tsx
 // src/component/main/widget/SqlErrorWidget/SqlErrorDetailDrawer.tsx
