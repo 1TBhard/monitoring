@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import UtilDate from "src/util/UtilDate";
 import getTps from "src/api/spot/getTps";
 import dayjs from "dayjs";
-import UtilLocalstoagetTps from "src/util/UtilLocalstoagetTps";
+import UtilLocalstoragetTps from "src/util/UtilLocalstoragetTps";
 
 export type UseTpsReturn = ReturnType<typeof useTps>;
 
@@ -14,7 +14,7 @@ export default function useTps() {
 	const { data, isError, isLoading } = useQuery({
 		queryFn: () => {
 			return getTps().then((value) => {
-				const localCacheData = UtilLocalstoagetTps.get();
+				const localCacheData = UtilLocalstoragetTps.get();
 
 				const lastItem = localCacheData[localCacheData.length - 1];
 				const lastItemDate = lastItem ? new Date(lastItem.date) : new Date();
@@ -27,9 +27,7 @@ export default function useTps() {
 					date: UtilDate.getCloseIntervalSecDate(nextDate, INTERVAL_SEC),
 				};
 
-				console.log("newLocalCacheData", newLocalCacheData);
-
-				UtilLocalstoagetTps.add(newLocalCacheData);
+				UtilLocalstoragetTps.add(newLocalCacheData);
 
 				return [...localCacheData, newLocalCacheData];
 			});

@@ -5,11 +5,11 @@ interface TpsStatics {
 	date: Date;
 }
 
-const LOCAL_SOTARGET_TPS_KEY = "TPS";
+const LOCAL_STORAGE_TPS_KEY = "TPS";
 
-export default class UtilLocalstoagetTps {
+export default class UtilLocalstoragetTps {
 	static count() {
-		return UtilLocalstoagetTps.get().length;
+		return this.get().length;
 	}
 
 	static isLimit() {
@@ -17,7 +17,7 @@ export default class UtilLocalstoagetTps {
 	}
 
 	static isEmpty() {
-		return !localStorage.getItem(LOCAL_SOTARGET_TPS_KEY)?.length;
+		return !localStorage.getItem(LOCAL_STORAGE_TPS_KEY)?.length;
 	}
 
 	static add(tpsStatics: TpsStatics) {
@@ -28,13 +28,13 @@ export default class UtilLocalstoagetTps {
 			nextList.splice(0, this.count() - TPS_CHART_MAX_DATA_NUMBER);
 		}
 
-		localStorage.setItem(LOCAL_SOTARGET_TPS_KEY, JSON.stringify(nextList));
+		localStorage.setItem(LOCAL_STORAGE_TPS_KEY, JSON.stringify(nextList));
 	}
 
 	static get() {
 		if (!this.isEmpty()) {
 			return JSON.parse(
-				localStorage.getItem(LOCAL_SOTARGET_TPS_KEY)!
+				localStorage.getItem(LOCAL_STORAGE_TPS_KEY)!
 			) as TpsStatics[];
 		}
 
