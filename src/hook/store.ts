@@ -9,6 +9,7 @@ export const QUERY_KEY = {
 	TODAY: "TODAY",
 	YESTERDAY: "YESTERDAY",
 	SQL: "SQL",
+	TPS: "TPS",
 } as const;
 
 export const queryClient = new QueryClient();
