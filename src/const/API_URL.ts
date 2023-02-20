@@ -7,6 +7,7 @@ export const API_URL = {
 	SPOT: {
 		INFO: `${baseURL}/spot`,
 		TPS: `${baseURL}/tps`,
+		AVG_RESPONSE_TIME: `${baseURL}/rtime`,
 	},
 	AGENT: `${baseURL}/agents`,
 	PROJECT: {
