@@ -23,7 +23,13 @@ export default function Widget({
 				<FlexBox>
 					<Styled.Title>{title}</Styled.Title>
 					{description && (
-						<Popover placement='left' title={title} content={description}>
+						<Popover
+							placement='left'
+							title={title}
+							content={
+								<Styled.DescriptionFrame>{description}</Styled.DescriptionFrame>
+							}
+						>
 							<Styled.TitleInfoIcon />
 						</Popover>
 					)}
