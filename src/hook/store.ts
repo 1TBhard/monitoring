@@ -6,6 +6,8 @@ export const QUERY_KEY = {
 	AGENT: "AGENT",
 	EXCEPTION: "EXCEPTION",
 	ACTIVE_USER: "ACTIVE_USER",
+	TODAY: "TODAY",
+	YESTERDAY: "YESTERDAY",
 	SQL: "SQL",
 } as const;
 
