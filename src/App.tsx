@@ -3,12 +3,14 @@ import ThemeProvider from "src/component/main/ThemeProvider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "src/hook/store";
 import "src/util/setTimezone";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 function App() {
 	return (
 		<ThemeProvider>
 			<QueryClientProvider client={queryClient}>
 				<Dashboard />
+				<ReactQueryDevtools initialIsOpen={false} />
 			</QueryClientProvider>
 		</ThemeProvider>
 	);
