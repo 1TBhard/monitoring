@@ -10,6 +10,7 @@ export const QUERY_KEY = {
 	YESTERDAY: "YESTERDAY",
 	SQL: "SQL",
 	TPS: "TPS",
+	AVG_RESPONSE_TIME: "AVG_RESPONSE_TIME",
 } as const;
 
 export const queryClient = new QueryClient();
