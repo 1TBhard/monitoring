@@ -29,3 +29,7 @@ export const TitleInfoIcon = styled(InfoCircleOutlined)`
 `;
 
 export const Body = styled.div``;
+
+export const DescriptionFrame = styled.div`
+	max-width: 400px;
+`;

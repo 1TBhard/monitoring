@@ -4,7 +4,11 @@ const JSON = "json";
 const baseURL = `/${API}/${JSON}`;
 
 export const API_URL = {
-	SPOT: `${baseURL}/spot`,
+	SPOT: {
+		INFO: `${baseURL}/spot`,
+		TPS: `${baseURL}/tps`,
+		AVG_RESPONSE_TIME: `${baseURL}/rtime`,
+	},
 	AGENT: `${baseURL}/agents`,
 	PROJECT: {
 		INFO: `${baseURL}/project`,
