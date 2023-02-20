@@ -7,6 +7,7 @@ import { TPS_CAHRT_1_MIN_INTERVAL } from "src/const/STATISTICS";
 import { UseTpsReturn } from "src/hook/spot/useTps";
 import UtilDate from "src/util/UtilDate";
 import UtilList from "src/util/UtilList";
+import UtilNumber from "src/util/UtilNumber";
 
 interface TpsWidgetContentProps {
 	isLoading: UseTpsReturn["isLoading"];
@@ -38,8 +39,7 @@ function TpsWidgetContent({
 		},
 		yAxis: {
 			label: {
-				formatter: (v) =>
-					`${v}`.replace(/\d{1,3}(?=(\d{3})+$)/g, (s) => `${s},`),
+				formatter: (v) => `${UtilNumber.toLocaleString(v)}s`,
 			},
 		},
 	};
