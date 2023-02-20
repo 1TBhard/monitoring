@@ -27,4 +27,27 @@ export default class UtilDate {
 
 		return { stime, etime };
 	}
+
+	static getNowYYYYmmDDhhMMss() {
+		return dayjs().format("YYYY-MM-DD HH:mm:ss");
+	}
+
+	static getHHmmFromTimeString(timeString: string) {
+		const date = dayjs(new Date(timeString));
+
+		return date.format("HH:mm");
+	}
+
+	/**
+	 * @description
+	 *  가까운 intervalSec 간격의 초단위의 시간을 반환
+	 *  예) date=2023-02-20 17:51 intervalSec=5
+	 *      => 2023-02-20 17:50 반환
+	 */
+	static getCloseIntervalSecDate(date: Date, intervalSec: number) {
+		const dateSec = dayjs(date).get("seconds");
+		const roundedSec = Math.floor(dateSec / intervalSec) * intervalSec;
+
+		return dayjs(date).set("seconds", roundedSec).toDate();
+	}
 }
