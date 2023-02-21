@@ -1,24 +1,24 @@
+import DateStatics from "src/type/DateStatics";
+import dayjs from "dayjs";
+import getTps from "src/api/spot/getTps";
+import UtilDate from "src/util/UtilDate";
 import { QUERY_COMMON } from "src/const/QUERY_CONST";
 import { QUERY_KEY } from "src/hook/store";
+import { TPS_CHART_MAX_DATA_NUMBER } from "src/const/STATISTICS";
 import { useQuery } from "@tanstack/react-query";
-import UtilDate from "src/util/UtilDate";
-import getTps from "src/api/spot/getTps";
-import dayjs from "dayjs";
-import UtilLocalstoragetTps from "src/util/UtilLocalstoragetTps";
-
-export type UseTpsReturn = ReturnType<typeof useTps>;
 
 const INTERVAL_SEC = QUERY_COMMON.REFETCH_INTERVAL / 1000;
+
+const localCacheData: DateStatics<number>[] = [];
 
 export default function useTps() {
 	const { data, isError, isLoading } = useQuery({
 		queryFn: () => {
 			return getTps().then((value) => {
-				const localCacheData = UtilLocalstoragetTps.get();
-
 				const lastItem = localCacheData[localCacheData.length - 1];
 				const lastItemDate = lastItem ? new Date(lastItem.date) : new Date();
-				const nextDate = dayjs(lastItemDate)
+
+				let nextDate = dayjs(lastItemDate)
 					.add(INTERVAL_SEC, "seconds")
 					.toDate();
 
@@ -27,9 +27,16 @@ export default function useTps() {
 					date: UtilDate.getCloseIntervalSecDate(nextDate, INTERVAL_SEC),
 				};
 
-				UtilLocalstoragetTps.add(newLocalCacheData);
+				localCacheData.push(newLocalCacheData);
 
-				return [...localCacheData, newLocalCacheData];
+				const sliceNums =
+					localCacheData.length > TPS_CHART_MAX_DATA_NUMBER
+						? localCacheData.length - TPS_CHART_MAX_DATA_NUMBER
+						: 0;
+
+				localCacheData.splice(0, sliceNums);
+
+				return localCacheData;
 			});
 		},
 

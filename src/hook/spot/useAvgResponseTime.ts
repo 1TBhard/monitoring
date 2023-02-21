@@ -1,21 +1,20 @@
 import dayjs from "dayjs";
 import getAvgReponseTime from "src/api/spot/getAvgReponseTime";
 import UtilDate from "src/util/UtilDate";
-import UtilLocalstorageAvgResponseTime from "src/util/UtilLocalstorageAvgResponseTime";
 import { QUERY_COMMON } from "src/const/QUERY_CONST";
 import { QUERY_KEY } from "src/hook/store";
 import { useQuery } from "@tanstack/react-query";
-
-export type UseAvgResponseTimeReturn = ReturnType<typeof useAvgResponseTime>;
+import { AVG_REPONSE_TIME_CHART_MAX_DATA_NUMBER } from "src/const/STATISTICS";
+import DateStatics from "src/type/DateStatics";
 
 const INTERVAL_SEC = QUERY_COMMON.REFETCH_INTERVAL / 1000;
+
+const localCacheData: DateStatics<number>[] = [];
 
 export default function useAvgResponseTime() {
 	const { data, isError, isLoading } = useQuery({
 		queryFn: () => {
 			return getAvgReponseTime().then((value) => {
-				const localCacheData = UtilLocalstorageAvgResponseTime.get();
-
 				const lastItem = localCacheData[localCacheData.length - 1];
 				const lastItemDate = lastItem ? new Date(lastItem.date) : new Date();
 				const nextDate = dayjs(lastItemDate)
@@ -27,9 +26,16 @@ export default function useAvgResponseTime() {
 					date: UtilDate.getCloseIntervalSecDate(nextDate, INTERVAL_SEC),
 				};
 
-				UtilLocalstorageAvgResponseTime.add(newLocalCacheData);
+				localCacheData.push(newLocalCacheData);
 
-				return [...localCacheData, newLocalCacheData];
+				const sliceNums =
+					localCacheData.length > AVG_REPONSE_TIME_CHART_MAX_DATA_NUMBER
+						? localCacheData.length - AVG_REPONSE_TIME_CHART_MAX_DATA_NUMBER
+						: 0;
+
+				localCacheData.splice(0, sliceNums);
+
+				return localCacheData;
 			});
 		},
 
