@@ -1,7 +1,7 @@
 export const QUERY_COMMON = {
 	RETRY: 0,
-	RETRY_DELAY: 60 * 1000, // ms
-	STALE_TIME: 60 * 1000,
+	RETRY_DELAY: 2000, // ms
+	STALE_TIME: 4000,
 	CACHE_TIME: 60 * 1000, // 30분,
 	REFETCH_INTERVAL: 5000,
 } as const;
