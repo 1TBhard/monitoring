@@ -1,25 +1,15 @@
-import { Area, AreaConfig } from "@ant-design/charts";
-import { memo } from "react";
 import CustomLoading from "src/component/common/CustomLoading";
 import ErrorWrapper from "src/component/common/ErrorWrapper";
+import useTps from "src/hook/spot/useTps";
+import UtilDate from "src/util/UtilDate";
+import UtilNumber from "src/util/UtilNumber";
+import { Area, AreaConfig } from "@ant-design/charts";
 import { LOAD_FAIL } from "src/const/MESSAGE";
 import { TPS_CAHRT_1_MIN_INTERVAL } from "src/const/STATISTICS";
-import { UseTpsReturn } from "src/hook/spot/useTps";
-import UtilDate from "src/util/UtilDate";
-import UtilList from "src/util/UtilList";
-import UtilNumber from "src/util/UtilNumber";
 
-interface TpsWidgetContentProps {
-	isLoading: UseTpsReturn["isLoading"];
-	isError: UseTpsReturn["isError"];
-	tpsList: UseTpsReturn["tpsList"];
-}
+export default function TpsAreaChart() {
+	const { tpsList, isError, isLoading } = useTps();
 
-function TpsWidgetContent({
-	tpsList,
-	isError,
-	isLoading,
-}: TpsWidgetContentProps) {
 	const areaConfig: AreaConfig = {
 		data: tpsList,
 		padding: "auto",
@@ -58,11 +48,3 @@ function TpsWidgetContent({
 		</CustomLoading>
 	);
 }
-
-export default memo(TpsWidgetContent, (prevProps, nextProps) => {
-	return (
-		prevProps.isError === nextProps.isError &&
-		prevProps.isLoading === nextProps.isLoading &&
-		UtilList.isEqual(prevProps.tpsList, nextProps.tpsList)
-	);
-});
