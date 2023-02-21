@@ -19,13 +19,7 @@ export default function useActiveUserByHour({
 		isError,
 	} = useQuery({
 		queryFn: () => getActiveUserByHour({ stime, etime }),
-		queryKey: [
-			QUERY_KEY.PROJECT,
-			QUERY_KEY.ACTIVE_USER,
-			QUERY_KEY.TODAY,
-			stime,
-			etime,
-		],
+		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.ACTIVE_USER, QUERY_KEY.TODAY],
 		staleTime: QUERY_BY_HOUR.STALE_TIME,
 		cacheTime: QUERY_BY_HOUR.CACHE_TIME,
 		retry: QUERY_BY_HOUR.RETRY,
@@ -47,13 +41,7 @@ export default function useActiveUserByHour({
 				etime: yesterdayEtime,
 			});
 		},
-		queryKey: [
-			QUERY_KEY.PROJECT,
-			QUERY_KEY.ACTIVE_USER,
-			QUERY_KEY.YESTERDAY,
-			stime,
-			etime,
-		],
+		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.ACTIVE_USER, QUERY_KEY.YESTERDAY],
 		staleTime: QUERY_BY_DAY.STALE_TIME,
 		cacheTime: QUERY_BY_DAY.CACHE_TIME,
 		retry: QUERY_BY_DAY.RETRY,

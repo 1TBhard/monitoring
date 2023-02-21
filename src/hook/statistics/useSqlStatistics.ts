@@ -1,10 +1,8 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 import getSqlStatistics from "src/api/statistics/getSqlStatistics";
 import { QUERY_COMMON } from "src/const/QUERY_CONST";
-import { TOP_SQL_ERROR_NUMBER } from "src/const/STATISTICS";
 import { QUERY_KEY } from "src/hook/store";
+import { TOP_SQL_ERROR_NUMBER } from "src/const/STATISTICS";
+import { useQuery } from "@tanstack/react-query";
 
 interface UseExceptionParams {
 	stime: number;
@@ -14,7 +12,7 @@ interface UseExceptionParams {
 export default function useSqlStatistics({ stime, etime }: UseExceptionParams) {
 	const { data, isLoading, isError } = useQuery({
 		queryFn: () => getSqlStatistics({ stime, etime }),
-		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SQL, stime, etime],
+		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SQL],
 		staleTime: QUERY_COMMON.STALE_TIME,
 		cacheTime: QUERY_COMMON.CACHE_TIME,
 		retry: QUERY_COMMON.RETRY,
@@ -28,19 +26,13 @@ export default function useSqlStatistics({ stime, etime }: UseExceptionParams) {
 			.sort((a, b) => b.count_error - a.count_error)
 			.slice(0, TOP_SQL_ERROR_NUMBER) ?? [];
 
-	// useMemo의 키
-	const memoKey = topSqlErrorStatistics
-		?.map((sqlStatistic) => sqlStatistic.count_error)
-		.join("-");
-
-	const sqlStatistics = useMemo(() => topSqlErrorStatistics, [memoKey]);
-
-	const totalError = useMemo(() => {
-		data?.records.reduce((acc, cur) => acc + cur.count_error, 0);
-	}, [memoKey]);
+	const totalError = data?.records.reduce(
+		(acc, cur) => acc + cur.count_error,
+		0
+	);
 
 	return {
-		sqlStatistics,
+		sqlStatistics: topSqlErrorStatistics,
 		allSqlStatistics: data?.records ?? [],
 		totalError,
 		totalService: data?.records ?? 0,
