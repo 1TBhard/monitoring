@@ -1,7 +1,8 @@
 import * as Styled from "./Styled.Widget";
 import FlexBox from "src/component/common/FlexBox";
-import { Popover, Skeleton } from "antd";
+import StaticHeadComponent from "src/component/common/Widget/StaticHeadComponent";
 import { PropsWithChildren, ReactNode } from "react";
+import { Skeleton } from "antd";
 
 interface WidgetProps {
 	title: string;
@@ -20,21 +21,7 @@ export default function Widget({
 	return (
 		<Styled.Frame>
 			<Styled.Header>
-				<FlexBox>
-					<Styled.Title>{title}</Styled.Title>
-					{description && (
-						<Popover
-							placement='left'
-							title={title}
-							content={
-								<Styled.DescriptionFrame>{description}</Styled.DescriptionFrame>
-							}
-						>
-							<Styled.TitleInfoIcon />
-						</Popover>
-					)}
-				</FlexBox>
-
+				<StaticHeadComponent title={title} description={description} />
 				{controlComponent && <FlexBox>{controlComponent}</FlexBox>}
 			</Styled.Header>
 

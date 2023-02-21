@@ -12,7 +12,7 @@ export default class UtilDate {
 	 */
 	static getTodayStimeEtime() {
 		const stime = dayjs().startOf("day").toDate().getTime();
-		const etime = dayjs().endOf("day").toDate().getTime();
+		const etime = dayjs().toDate().getTime();
 
 		return { stime, etime };
 	}

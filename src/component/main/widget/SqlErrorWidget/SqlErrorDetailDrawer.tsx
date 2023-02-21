@@ -3,10 +3,11 @@ import CustomDrawer, {
 } from "src/component/common/CustomDrawer";
 import ResponsiveTable from "src/component/common/table/ResponsiveTable";
 import SqlStatistics from "src/type/SqlStatistics";
-import UtilList from "src/util/UtilList";
+import useSqlStatistics from "src/hook/statistics/useSqlStatistics";
+import UtilDate from "src/util/UtilDate";
+import { LOAD_FAIL } from "src/const/MESSAGE";
 import { memo } from "react";
 import { TableProps } from "antd";
-import { LOAD_FAIL } from "src/const/MESSAGE";
 
 const columns = [
 	{
@@ -54,20 +55,20 @@ const columns = [
 ] as TableProps<object>["columns"];
 
 interface SqlErrorDetailDrawerProps {
-	isLoading: boolean;
-	isError: boolean;
 	isShowDrawer: boolean;
 	onClose: CustomDrawerProps["onClose"];
-	allSqlStatistics: SqlStatistics[];
 }
 
 function SqlErrorDetailDrawer({
-	isLoading,
-	isError,
 	isShowDrawer,
 	onClose,
-	allSqlStatistics,
 }: SqlErrorDetailDrawerProps) {
+	const { stime, etime } = UtilDate.getTodayStimeEtime();
+	const { allSqlStatistics, isLoading, isError } = useSqlStatistics({
+		stime,
+		etime,
+	});
+
 	return (
 		<CustomDrawer
 			open={isShowDrawer}
@@ -89,10 +90,5 @@ function SqlErrorDetailDrawer({
 }
 
 export default memo(SqlErrorDetailDrawer, (prevProps, nextProps) => {
-	return (
-		prevProps.isShowDrawer === nextProps.isShowDrawer &&
-		prevProps.isLoading === nextProps.isLoading &&
-		prevProps.isError === nextProps.isError &&
-		UtilList.isEqual(prevProps.allSqlStatistics, nextProps.allSqlStatistics)
-	);
+	return prevProps.isShowDrawer === nextProps.isShowDrawer;
 });

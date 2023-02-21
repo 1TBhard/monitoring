@@ -1,19 +1,17 @@
 import CustomLoading from "src/component/common/CustomLoading";
 import ErrorWrapper from "src/component/common/ErrorWrapper";
 import useActiveUserByHour from "src/hook/statistics/useActiveUserByHour";
-import UtilList from "src/util/UtilList";
+import UtilDate from "src/util/UtilDate";
 import { Area, AreaConfig } from "@ant-design/charts";
 import { LOAD_FAIL } from "src/const/MESSAGE";
-import { memo } from "react";
 
-interface ActiveUserWidgetContentProps
-	extends ReturnType<typeof useActiveUserByHour> {}
+export default function ActiveUserWidgetContent() {
+	const { stime, etime } = UtilDate.getTodayStimeEtime();
+	const { activeUserList, isLoading, isError } = useActiveUserByHour({
+		stime,
+		etime,
+	});
 
-function ActiveUserWidgetContent({
-	isLoading,
-	activeUserList,
-	isError,
-}: ActiveUserWidgetContentProps) {
 	const areaConfig: AreaConfig = {
 		data: activeUserList,
 		padding: "auto",
@@ -46,11 +44,3 @@ function ActiveUserWidgetContent({
 		</CustomLoading>
 	);
 }
-
-export default memo(ActiveUserWidgetContent, (prevProps, nextProps) => {
-	return (
-		prevProps.isError === nextProps.isError &&
-		prevProps.isLoading === nextProps.isLoading &&
-		UtilList.isEqual(prevProps.activeUserList, nextProps.activeUserList)
-	);
-});

@@ -1,20 +1,11 @@
 import MoreInfoButton from "src/component/common/button/MoreInfoButton";
 import SqlErrorBarChart from "src/component/main/widget/SqlErrorWidget/SqlErrorBarChart";
 import SqlErrorDetailDrawer from "src/component/main/widget/SqlErrorWidget/SqlErrorDetailDrawer";
-import useSqlStatistics from "src/hook/statistics/useSqlStatistics";
-import UtilDate from "src/util/UtilDate";
 import Widget from "src/component/common/Widget";
-import { useCallback, useState } from "react";
 import { DESCRIPTION } from "src/const/MESSAGE";
+import { useCallback, useState } from "react";
 
 export default function SqlErrorWidget() {
-	const { stime, etime } = UtilDate.getTodayStimeEtime();
-	const { sqlStatistics, allSqlStatistics, isLoading, isError } =
-		useSqlStatistics({
-			stime,
-			etime,
-		});
-
 	const [isShowDrawer, setIsShowDrawer] = useState(false);
 	const onClose = useCallback(() => {
 		setIsShowDrawer(false);
@@ -32,20 +23,10 @@ export default function SqlErrorWidget() {
 					/>
 				}
 			>
-				<SqlErrorBarChart
-					isLoading={isLoading}
-					isError={isError}
-					data={sqlStatistics}
-				/>
+				<SqlErrorBarChart />
 			</Widget>
 
-			<SqlErrorDetailDrawer
-				isLoading={isLoading}
-				isError={isError}
-				allSqlStatistics={allSqlStatistics}
-				isShowDrawer={isShowDrawer}
-				onClose={onClose}
-			/>
+			<SqlErrorDetailDrawer isShowDrawer={isShowDrawer} onClose={onClose} />
 		</>
 	);
 }
