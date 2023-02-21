@@ -33,6 +33,10 @@ export default function AvgResponseTimeAreaChart() {
 				formatter: (v) => `${UtilNumber.toLocaleString(v)}s`,
 			},
 		},
+
+		tooltip: {
+			formatter: (datum) => ({ name: `응답시간`, value: datum.value }),
+		},
 	};
 
 	if (isError) {
