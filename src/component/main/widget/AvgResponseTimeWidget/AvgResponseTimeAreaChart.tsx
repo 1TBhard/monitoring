@@ -1,25 +1,15 @@
 import CustomLoading from "src/component/common/CustomLoading";
 import ErrorWrapper from "src/component/common/ErrorWrapper";
+import useAvgResponseTime from "src/hook/spot/useAvgResponseTime";
 import UtilDate from "src/util/UtilDate";
+import UtilNumber from "src/util/UtilNumber";
 import { Area, AreaConfig } from "@ant-design/charts";
 import { AVG_REPONSE_TIME_CHART_1_MIN_INTERVAL } from "src/const/STATISTICS";
 import { LOAD_FAIL } from "src/const/MESSAGE";
-import { UseAvgResponseTimeReturn } from "src/hook/spot/useAvgResponseTime";
-import UtilNumber from "src/util/UtilNumber";
-import UtilList from "src/util/UtilList";
-import { memo } from "react";
 
-interface AvgResponseTimeWidgetContentProps {
-	avgResponseTimeList: UseAvgResponseTimeReturn["avgResponseTimeList"];
-	isError: UseAvgResponseTimeReturn["isError"];
-	isLoading: UseAvgResponseTimeReturn["isLoading"];
-}
+export default function AvgResponseTimeAreaChart() {
+	const { avgResponseTimeList, isError, isLoading } = useAvgResponseTime();
 
-function AvgResponseTimeWidgetContent({
-	avgResponseTimeList,
-	isError,
-	isLoading,
-}: AvgResponseTimeWidgetContentProps) {
 	const areaConfig: AreaConfig = {
 		data: avgResponseTimeList,
 		padding: "auto",
@@ -59,14 +49,3 @@ function AvgResponseTimeWidgetContent({
 		</CustomLoading>
 	);
 }
-
-export default memo(AvgResponseTimeWidgetContent, (prevProps, nextProps) => {
-	return (
-		prevProps.isError === nextProps.isError &&
-		prevProps.isLoading === nextProps.isLoading &&
-		UtilList.isEqual(
-			prevProps.avgResponseTimeList,
-			nextProps.avgResponseTimeList
-		)
-	);
-});
