@@ -23,7 +23,6 @@ export default function TpsAreaChart() {
 				formatter: (timeString: string) =>
 					UtilDate.getHHmmFromTimeString(timeString),
 			},
-
 			type: "time",
 			mask: "YYYY-MM-DD HH:mm:ss",
 		},
@@ -31,6 +30,9 @@ export default function TpsAreaChart() {
 			label: {
 				formatter: (v) => `${UtilNumber.toLocaleString(v)}s`,
 			},
+		},
+		tooltip: {
+			formatter: (datum) => ({ name: "TPS", value: datum.value }),
 		},
 	};
 
