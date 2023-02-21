@@ -214,12 +214,7 @@ export default function useActiveUserByHour({
 
 // React.memo()를 통해 메모이징
 export default memo(SqlErrorDetailDrawer, (prevProps, nextProps) => {
-  return (
-    prevProps.isShowDrawer === nextProps.isShowDrawer &&
-    prevProps.isLoading === nextProps.isLoading &&
-    prevProps.isError === nextProps.isError &&
-    UtilList.isEqual(prevProps.allSqlStatistics, nextProps.allSqlStatistics)
-  );
+  return prevProps.isShowDrawer === nextProps.isShowDrawer;
 });
 ```
 
