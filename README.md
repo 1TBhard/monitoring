@@ -19,6 +19,7 @@
       - [2-2 데이터와 컴포넌트 로직을 분리한다](#2-2-데이터와-컴포넌트-로직을-분리한다)
     - [3. 유지보수에 힘쓰기 🤝](#3-유지보수에-힘쓰기-)
     - [4. 리버스 프록시로 CORS 해결 🛠](#4-리버스-프록시로-cors-해결-)
+    - [5. 단발성 호출 api를 이용하여 차트 그리기](#5-단발성-호출-api를-이용하여-차트-그리기)
 
 <br/>
 
@@ -150,8 +151,8 @@ util | 유틸리티 관련 함수들이 모인 폴더
 
 - [x] 금일 사용자를 보여주는 위젯
   - 금일 사용자 위젯
-- [ ] 평균 응답시간보여주는 위젯
-- [ ] DB 트랜젝션량을 보여주는 위젯
+- [x] 평균 응답시간보여주는 위젯
+- [x] DB 트랜젝션량을 보여주는 위젯
 - [x] 예외 발생을 보여주는 위젯
   - 금일 SQL 에러
 
@@ -268,4 +269,43 @@ module.exports = function (app) {
     })
   );
 };
+```
+
+### 5. 단발성 호출 api를 이용하여 차트 그리기
+
+차트를 그리기 위해서는 데이터 리스트들이 필요합니다.
+
+그러나, 다음과 같은 api를 호출하는 경우 리스트 형태가 아닌 단발성의 응답값을 받았습니다.
+
+- TPS 데이터
+  - request: `https://api.whatap.io/open/api/raw/tag/app_counter/tps?stitme=[stime]&etime=[etime]&timeMerge=[timeMerge]`
+  - response: `66.0`
+
+- 평균 응답시간 테이터
+  - request: `https://api.whatap.io/open/api/raw/tag/app_counter/resp_time?stitme=[stime]&etime=[etime]&timeMerge=[timeMerge]`
+  - response: `1640`
+
+호출시 응답값과 이전 응답값을 결합하여 차트를 그리도록 수행하였습니다.
+이전 react-query의 `queryClient`로 접근하여 이전 데이터들을 가져오는 방식으로 구현하였습니다.
+
+```ts
+// src/hook/spot/useAvgResponseTime.ts
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SPOT, QUERY_KEY.AVG_RESPONSE_TIME],
+    queryFn: async () => {
+      // 이전 데이터들에 접근 및 가져오기
+      const prevData = queryClient.getQueryData([
+        QUERY_KEY.PROJECT,
+        QUERY_KEY.SPOT,
+        QUERY_KEY.AVG_RESPONSE_TIME,
+      ]) as { date: Date; value: number }[];  
+
+      let dataList; 
+      if (prevData.length === 0) {
+        dataList = await getInitData();
+      } else {
+        dataList = prevData;
+      }
+  // ...
 ```
