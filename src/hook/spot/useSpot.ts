@@ -7,7 +7,14 @@ export type UseSpotReturn = ReturnType<typeof useSpot>;
 
 export default function useSpot() {
 	const { data, isError, isLoading } = useQuery({
-		queryFn: getSpot,
+		queryFn: () => {
+			return getSpot().then((res) => ({
+				act_agent: res.act_agent,
+				inact_agent: res.inact_agent,
+				cpucore: res.cpucore,
+				host: res.host,
+			}));
+		},
 		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SPOT],
 		staleTime: QUERY_COMMON.STALE_TIME,
 		cacheTime: QUERY_COMMON.CACHE_TIME,
@@ -37,7 +44,6 @@ export default function useSpot() {
 	];
 
 	return {
-		spot: data,
 		spotItemList,
 		isLoading,
 		isError,

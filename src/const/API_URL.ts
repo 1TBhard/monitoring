@@ -1,18 +1,24 @@
 import { API } from "src/const/PROXY_API_URL";
 
 const JSON = "json";
-const baseURL = `/${API}/${JSON}`;
+const RAW = "raw";
+const baseURLjson = `/${API}/${JSON}`;
+const baseURLraw = `/${API}/${RAW}`;
 
 export const API_URL = {
-	SPOT: `${baseURL}/spot`,
-	AGENT: `${baseURL}/agents`,
+	SPOT: {
+		INFO: `${baseURLjson}/spot`,
+	},
+	AGENT: `${baseURLjson}/agents`,
 	PROJECT: {
-		INFO: `${baseURL}/project`,
-		MEMBER_LIST: `${baseURL}/project/:projectCode/members`,
+		INFO: `${baseURLjson}/project`,
+		MEMBER_LIST: `${baseURLjson}/project/:projectCode/members`,
 	},
 	STATISTICS: {
-		EXCEPTION: `${baseURL}/exception/:stime/:etime`,
-		ACTIVE_USER_BY_HOUR: `${baseURL}/visitor_h/:stime/:etime`,
-		SQL: `${baseURL}/sql/:stime/:etime`,
+		EXCEPTION: `${baseURLjson}/exception/:stime/:etime`,
+		ACTIVE_USER_BY_HOUR: `${baseURLjson}/visitor_h/:stime/:etime`,
+		SQL: `${baseURLjson}/sql/:stime/:etime`,
+		TPS: `${baseURLraw}/tag/app_counter/tps`,
+		AVG_RESPONSE_TIME: `${baseURLraw}/tag/app_counter/resp_time`,
 	},
 } as const;
