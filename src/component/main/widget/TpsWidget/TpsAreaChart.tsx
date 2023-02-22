@@ -2,7 +2,6 @@ import CustomLoading from "src/component/common/CustomLoading";
 import ErrorWrapper from "src/component/common/ErrorWrapper";
 import useTps from "src/hook/spot/useTps";
 import UtilDate from "src/util/UtilDate";
-import UtilNumber from "src/util/UtilNumber";
 import { Area, AreaConfig } from "@ant-design/charts";
 import { LOAD_FAIL } from "src/const/MESSAGE";
 import { TPS_CAHRT_1_MIN_INTERVAL } from "src/const/STATISTICS";
@@ -28,11 +27,14 @@ export default function TpsAreaChart() {
 		},
 		yAxis: {
 			label: {
-				formatter: (v) => `${UtilNumber.toLocaleString(v)}s`,
+				formatter: (v) => UtilDate.msToSecString(Number(v) * 1000),
 			},
 		},
 		tooltip: {
-			formatter: (datum) => ({ name: "TPS", value: datum.value }),
+			formatter: (datum) => ({
+				name: "TPS",
+				value: `${UtilDate.msToSecString(datum.value * 1000)}`,
+			}),
 		},
 	};
 

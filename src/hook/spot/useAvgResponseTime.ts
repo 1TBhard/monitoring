@@ -1,56 +1,89 @@
-import dayjs from "dayjs";
-import getAvgReponseTime from "src/api/spot/getAvgReponseTime";
+import getAvgReponseTime from "src/api/statistics/getAvgReponseTime";
 import UtilDate from "src/util/UtilDate";
+import {
+	AVG_RESPONSE_TIME_CAHRT,
+	CALL_BIAS_SECONDS,
+} from "src/const/STATISTICS";
 import { QUERY_COMMON } from "src/const/QUERY_CONST";
-import { QUERY_KEY } from "src/hook/store";
+import { QUERY_KEY, queryClient } from "src/hook/store";
 import { useQuery } from "@tanstack/react-query";
-import { AVG_REPONSE_TIME_CHART_MAX_DATA_NUMBER } from "src/const/STATISTICS";
-import DateStatics from "src/type/DateStatics";
-
-const INTERVAL_SEC = QUERY_COMMON.REFETCH_INTERVAL / 1000;
-
-const localCacheData: DateStatics<number>[] = [];
+import dayjs from "dayjs";
 
 export default function useAvgResponseTime() {
-	const { data, isError, isLoading } = useQuery({
-		queryFn: () => {
-			return getAvgReponseTime().then((value) => {
-				const lastItem = localCacheData[localCacheData.length - 1];
-				const lastItemDate = lastItem ? new Date(lastItem.date) : new Date();
-				const nextDate = dayjs(lastItemDate)
-					.add(INTERVAL_SEC, "seconds")
-					.toDate();
+	const getInitData = async () => {
+		const currentDate = dayjs().add(CALL_BIAS_SECONDS, "seconds").toDate();
 
-				const newLocalCacheData = {
-					value: Math.round(value / 10) / 100,
-					date: UtilDate.getCloseIntervalSecDate(nextDate, INTERVAL_SEC),
-				};
+		const closeDateBySec = UtilDate.getCloseIntervalSecDate(
+			currentDate,
+			AVG_RESPONSE_TIME_CAHRT.INTERVAL_SEC
+		);
+		const startDate = UtilDate.getDateBeforeMinutes(closeDateBySec, 1);
 
-				localCacheData.push(newLocalCacheData);
+		const timeList = UtilDate.getStimeEtimeBySecInterval(
+			startDate,
+			closeDateBySec,
+			AVG_RESPONSE_TIME_CAHRT.INTERVAL_SEC
+		);
 
-				const sliceNums =
-					localCacheData.length > AVG_REPONSE_TIME_CHART_MAX_DATA_NUMBER
-						? localCacheData.length - AVG_REPONSE_TIME_CHART_MAX_DATA_NUMBER
-						: 0;
+		return Promise.all(
+			timeList.map(({ stime, etime }) =>
+				getAvgReponseTime({ stime, etime }).then((value) => ({
+					date: new Date(stime),
+					value,
+				}))
+			)
+		);
+	};
 
-				localCacheData.splice(0, sliceNums);
+	const { data, isLoading, isError } = useQuery({
+		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SPOT, QUERY_KEY.AVG_RESPONSE_TIME],
+		queryFn: async () => {
+			const prevData = queryClient.getQueryData([
+				QUERY_KEY.PROJECT,
+				QUERY_KEY.SPOT,
+				QUERY_KEY.AVG_RESPONSE_TIME,
+			]) as { date: Date; value: number }[];
 
-				return localCacheData;
+			let dataList;
+
+			if (prevData.length === 0) {
+				dataList = await getInitData();
+			} else {
+				dataList = prevData;
+			}
+
+			const lastItem = dataList[dataList.length - 1];
+			const lastTime = lastItem.date;
+
+			const nextStime = dayjs(lastTime).add(5, "seconds");
+			const nextEtime = dayjs(nextStime).add(5, "seconds");
+
+			const res = await getAvgReponseTime({
+				stime: nextStime.toDate().getTime(),
+				etime: nextEtime.toDate().getTime(),
 			});
+
+			const nextDataList = [
+				...dataList,
+				{ date: nextStime.toDate(), value: res },
+			];
+
+			return nextDataList.slice(
+				AVG_RESPONSE_TIME_CAHRT.MAX_DATA_NUMBER < nextDataList.length
+					? nextDataList.length - AVG_RESPONSE_TIME_CAHRT.MAX_DATA_NUMBER
+					: 0,
+				nextDataList.length
+			);
 		},
 
-		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SPOT, QUERY_KEY.AVG_RESPONSE_TIME],
 		staleTime: QUERY_COMMON.STALE_TIME,
-		cacheTime: QUERY_COMMON.CACHE_TIME,
-		retry: QUERY_COMMON.RETRY,
-		retryDelay: QUERY_COMMON.RETRY_DELAY,
 		refetchInterval: QUERY_COMMON.REFETCH_INTERVAL,
+		retry: QUERY_COMMON.RETRY,
+		cacheTime: QUERY_COMMON.CACHE_TIME,
+		keepPreviousData: true,
 		refetchIntervalInBackground: true,
+		initialData: [],
 	});
 
-	return {
-		avgResponseTimeList: data ?? [],
-		isLoading,
-		isError,
-	};
+	return { avgResTimeList: data ?? [], isLoading, isError };
 }

@@ -1,57 +1,86 @@
-import DateStatics from "src/type/DateStatics";
 import dayjs from "dayjs";
-import getTps from "src/api/spot/getTps";
+import getTps from "src/api/statistics/getTps";
 import UtilDate from "src/util/UtilDate";
+import { CALL_BIAS_SECONDS, TPS_CAHRT } from "src/const/STATISTICS";
 import { QUERY_COMMON } from "src/const/QUERY_CONST";
-import { QUERY_KEY } from "src/hook/store";
-import { TPS_CHART_MAX_DATA_NUMBER } from "src/const/STATISTICS";
+import { QUERY_KEY, queryClient } from "src/hook/store";
 import { useQuery } from "@tanstack/react-query";
 
-const INTERVAL_SEC = QUERY_COMMON.REFETCH_INTERVAL / 1000;
-
-const localCacheData: DateStatics<number>[] = [];
-
 export default function useTps() {
-	const { data, isError, isLoading } = useQuery({
-		queryFn: () => {
-			return getTps().then((value) => {
-				const lastItem = localCacheData[localCacheData.length - 1];
-				const lastItemDate = lastItem ? new Date(lastItem.date) : new Date();
+	const getInitData = async () => {
+		const currentDate = dayjs().add(CALL_BIAS_SECONDS, "seconds").toDate();
 
-				let nextDate = dayjs(lastItemDate)
-					.add(INTERVAL_SEC, "seconds")
-					.toDate();
+		const closeDateBySec = UtilDate.getCloseIntervalSecDate(
+			currentDate,
+			TPS_CAHRT.INTERVAL_SEC
+		);
+		const startDate = UtilDate.getDateBeforeMinutes(closeDateBySec, 1);
 
-				const newLocalCacheData = {
+		const timeList = UtilDate.getStimeEtimeBySecInterval(
+			startDate,
+			closeDateBySec,
+			TPS_CAHRT.INTERVAL_SEC
+		);
+
+		return Promise.all(
+			timeList.map(({ stime, etime }) =>
+				getTps({ stime, etime }).then((value) => ({
+					date: new Date(stime),
 					value,
-					date: UtilDate.getCloseIntervalSecDate(nextDate, INTERVAL_SEC),
-				};
+				}))
+			)
+		);
+	};
 
-				localCacheData.push(newLocalCacheData);
+	const { data, isLoading, isError } = useQuery({
+		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SPOT, QUERY_KEY.TPS],
+		queryFn: async () => {
+			const prevData = queryClient.getQueryData([
+				QUERY_KEY.PROJECT,
+				QUERY_KEY.SPOT,
+				QUERY_KEY.TPS,
+			]) as { date: Date; value: number }[];
 
-				const sliceNums =
-					localCacheData.length > TPS_CHART_MAX_DATA_NUMBER
-						? localCacheData.length - TPS_CHART_MAX_DATA_NUMBER
-						: 0;
+			let dataList;
 
-				localCacheData.splice(0, sliceNums);
+			if (prevData.length === 0) {
+				dataList = await getInitData();
+			} else {
+				dataList = prevData;
+			}
 
-				return localCacheData;
+			const lastItem = dataList[dataList.length - 1];
+			const lastTime = lastItem.date;
+
+			const nextStime = dayjs(lastTime).add(5, "seconds");
+			const nextEtime = dayjs(nextStime).add(5, "seconds");
+
+			const res = await getTps({
+				stime: nextStime.toDate().getTime(),
+				etime: nextEtime.toDate().getTime(),
 			});
+
+			const nextDataList = [
+				...dataList,
+				{ date: nextStime.toDate(), value: res },
+			];
+
+			return nextDataList.slice(
+				TPS_CAHRT.MAX_DATA_NUMBER < nextDataList.length
+					? nextDataList.length - TPS_CAHRT.MAX_DATA_NUMBER
+					: 0,
+				nextDataList.length
+			);
 		},
 
-		queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.SPOT, QUERY_KEY.TPS],
 		staleTime: QUERY_COMMON.STALE_TIME,
-		cacheTime: QUERY_COMMON.CACHE_TIME,
-		retry: QUERY_COMMON.RETRY,
-		retryDelay: QUERY_COMMON.RETRY_DELAY,
 		refetchInterval: QUERY_COMMON.REFETCH_INTERVAL,
+		retry: QUERY_COMMON.RETRY,
+		cacheTime: QUERY_COMMON.CACHE_TIME,
+		keepPreviousData: true,
 		refetchIntervalInBackground: true,
+		initialData: [],
 	});
 
-	return {
-		tpsList: data ?? [],
-		isLoading,
-		isError,
-	};
+	return { tpsList: data ?? [], isLoading, isError };
 }
