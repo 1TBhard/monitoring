@@ -2,16 +2,15 @@ import CustomLoading from "src/component/common/CustomLoading";
 import ErrorWrapper from "src/component/common/ErrorWrapper";
 import useAvgResponseTime from "src/hook/spot/useAvgResponseTime";
 import UtilDate from "src/util/UtilDate";
-import UtilNumber from "src/util/UtilNumber";
 import { Area, AreaConfig } from "@ant-design/charts";
-import { AVG_REPONSE_TIME_CHART_1_MIN_INTERVAL } from "src/const/STATISTICS";
+import { AVG_RESPONSE_TIME_CAHRT } from "src/const/STATISTICS";
 import { LOAD_FAIL } from "src/const/MESSAGE";
 
 export default function AvgResponseTimeAreaChart() {
-	const { avgResponseTimeList, isError, isLoading } = useAvgResponseTime();
+	const { avgResTimeList, isError, isLoading } = useAvgResponseTime();
 
 	const areaConfig: AreaConfig = {
-		data: avgResponseTimeList,
+		data: avgResTimeList,
 		padding: "auto",
 		xField: "date",
 		yField: "value",
@@ -19,7 +18,7 @@ export default function AvgResponseTimeAreaChart() {
 		animation: false,
 		xAxis: {
 			tickCount:
-				avgResponseTimeList.length / AVG_REPONSE_TIME_CHART_1_MIN_INTERVAL,
+				avgResTimeList.length / AVG_RESPONSE_TIME_CAHRT.DATA_NUMS_BY_1_MIN,
 			label: {
 				formatter: (timeString: string) =>
 					UtilDate.getHHmmFromTimeString(timeString),
@@ -30,12 +29,15 @@ export default function AvgResponseTimeAreaChart() {
 		},
 		yAxis: {
 			label: {
-				formatter: (v) => `${UtilNumber.toLocaleString(v)}s`,
+				formatter: (ms) => UtilDate.msToSecString(ms),
 			},
 		},
 
 		tooltip: {
-			formatter: (datum) => ({ name: `응답시간`, value: datum.value }),
+			formatter: (datum) => ({
+				name: "응답시간",
+				value: UtilDate.msToSecString(datum.value),
+			}),
 		},
 	};
 
