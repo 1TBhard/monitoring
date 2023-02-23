@@ -46,7 +46,7 @@ export default function useAvgResponseTime() {
 
 			let dataList;
 
-			if (prevData.length === 0) {
+			if (!prevData?.length) {
 				dataList = await getInitData();
 			} else {
 				dataList = prevData;
@@ -82,7 +82,6 @@ export default function useAvgResponseTime() {
 		cacheTime: QUERY_COMMON.CACHE_TIME,
 		keepPreviousData: true,
 		refetchIntervalInBackground: true,
-		initialData: [],
 	});
 
 	return { avgResTimeList: data ?? [], isLoading, isError };
