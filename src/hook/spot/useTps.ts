@@ -43,7 +43,7 @@ export default function useTps() {
 
 			let dataList;
 
-			if (prevData.length === 0) {
+			if (!prevData?.length) {
 				dataList = await getInitData();
 			} else {
 				dataList = prevData;
@@ -79,7 +79,6 @@ export default function useTps() {
 		cacheTime: QUERY_COMMON.CACHE_TIME,
 		keepPreviousData: true,
 		refetchIntervalInBackground: true,
-		initialData: [],
 	});
 
 	return { tpsList: data ?? [], isLoading, isError };
