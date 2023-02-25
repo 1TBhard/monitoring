@@ -4,6 +4,8 @@ import SqlErrorDetailDrawer from "src/component/main/widget/SqlErrorWidget/SqlEr
 import Widget from "src/component/common/Widget";
 import { DESCRIPTION } from "src/const/MESSAGE";
 import { useCallback, useState } from "react";
+import { WidgetDataContext } from "src/hook/WidgetDataProvider";
+import { TOP_SQL_ERROR_NUMBER } from "src/const/STATISTICS";
 
 export default function SqlErrorWidget() {
 	const [isShowDrawer, setIsShowDrawer] = useState(false);
@@ -23,10 +25,26 @@ export default function SqlErrorWidget() {
 					/>
 				}
 			>
-				<SqlErrorBarChart />
+				<WidgetDataContext.Consumer>
+					{(widgetData) => (
+						<>
+							<SqlErrorBarChart
+								sqlStatistics={widgetData.sqlErrorList.data.slice(
+									0,
+									TOP_SQL_ERROR_NUMBER
+								)}
+								state={widgetData.sqlErrorList.state}
+							/>
+							<SqlErrorDetailDrawer
+								sqlStatistics={widgetData.sqlErrorList.data}
+								state={widgetData.sqlErrorList.state}
+								isShowDrawer={isShowDrawer}
+								onClose={onClose}
+							/>
+						</>
+					)}
+				</WidgetDataContext.Consumer>
 			</Widget>
-
-			<SqlErrorDetailDrawer isShowDrawer={isShowDrawer} onClose={onClose} />
 		</>
 	);
 }

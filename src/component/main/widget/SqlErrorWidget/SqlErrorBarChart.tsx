@@ -1,8 +1,8 @@
 import CustomLoading from "src/component/common/CustomLoading";
-import useSqlStatistics from "src/hook/statistics/useSqlStatistics";
-import UtilDate from "src/util/UtilDate";
+import SqlStatistics from "src/type/SqlStatistics";
 import { Bar, BarConfig } from "@ant-design/charts";
 import { LOAD_FAIL, NO_DATA } from "src/const/MESSAGE";
+import LoadingState from "src/type/LoadingState";
 
 const barConfig: Omit<BarConfig, "data"> = {
 	xField: "count_error",
@@ -17,14 +17,16 @@ const barConfig: Omit<BarConfig, "data"> = {
 	interactions: [{ type: "element-highlight" }, { type: "hover-cursor" }],
 };
 
-export default function SqlErrorBarChart() {
-	const { stime, etime } = UtilDate.getTodayStimeEtime();
-	const { sqlStatistics, isLoading, isError } = useSqlStatistics({
-		stime,
-		etime,
-	});
+interface SqlErrorBarChartProps {
+	sqlStatistics: SqlStatistics[];
+	state: LoadingState;
+}
 
-	if (isError) {
+export default function SqlErrorBarChart({
+	sqlStatistics,
+	state,
+}: SqlErrorBarChartProps) {
+	if (state === "error") {
 		return <>{LOAD_FAIL}</>;
 	}
 
@@ -33,7 +35,7 @@ export default function SqlErrorBarChart() {
 	}
 
 	return (
-		<CustomLoading spinning={isLoading}>
+		<CustomLoading spinning={state === "loading"}>
 			<Bar {...barConfig} data={sqlStatistics} />
 		</CustomLoading>
 	);

@@ -3,11 +3,10 @@ import CustomDrawer, {
 } from "src/component/common/CustomDrawer";
 import ResponsiveTable from "src/component/common/table/ResponsiveTable";
 import SqlStatistics from "src/type/SqlStatistics";
-import useSqlStatistics from "src/hook/statistics/useSqlStatistics";
-import UtilDate from "src/util/UtilDate";
 import { LOAD_FAIL } from "src/const/MESSAGE";
 import { memo } from "react";
 import { TableProps } from "antd";
+import LoadingState from "src/type/LoadingState";
 
 const columns = [
 	{
@@ -55,20 +54,18 @@ const columns = [
 ] as TableProps<object>["columns"];
 
 interface SqlErrorDetailDrawerProps {
+	sqlStatistics: SqlStatistics[];
+	state: LoadingState;
 	isShowDrawer: boolean;
 	onClose: CustomDrawerProps["onClose"];
 }
 
 function SqlErrorDetailDrawer({
+	sqlStatistics,
+	state,
 	isShowDrawer,
 	onClose,
 }: SqlErrorDetailDrawerProps) {
-	const { stime, etime } = UtilDate.getTodayStimeEtime();
-	const { allSqlStatistics, isLoading, isError } = useSqlStatistics({
-		stime,
-		etime,
-	});
-
 	return (
 		<CustomDrawer
 			open={isShowDrawer}
@@ -76,13 +73,13 @@ function SqlErrorDetailDrawer({
 			onClose={onClose}
 			destroyOnClose={true}
 		>
-			{isError ? (
+			{state === "error" ? (
 				<>{LOAD_FAIL}</>
 			) : (
 				<ResponsiveTable
-					loading={isLoading}
+					loading={state === "loading"}
 					columns={columns}
-					dataSource={allSqlStatistics}
+					dataSource={sqlStatistics}
 				/>
 			)}
 		</CustomDrawer>

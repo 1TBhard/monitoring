@@ -3,7 +3,7 @@ import ResponseRecords from "src/type/ResponseRecords";
 import SqlStatistics from "src/type/SqlStatistics";
 import { API_URL } from "src/const/API_URL";
 
-interface GetSqlStatisticsParams {
+export interface GetSqlStatisticsParams {
 	stime: number;
 	etime: number;
 }
