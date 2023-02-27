@@ -1,11 +1,12 @@
 import WithLoadingState from "src/type/WithLoadingState";
 import Project from "src/type/Project";
 import SqlStatistics from "src/type/SqlStatistics";
+import ActiveUserList from "src/type/ActiveUserList";
 
 export const INITIAL_PROJECT: WithLoadingState<Project> = {
 	state: "idle",
 	data: {
-		platform: "ttt",
+		platform: "",
 		createTime: "",
 		gatewayName: "",
 		projectCode: "",
@@ -44,6 +45,11 @@ export const INITIAL_SPOT_ITEM_LIST: WithLoadingState<
 };
 
 export const INITIAL_SQL_ERROR_LIST: WithLoadingState<SqlStatistics[]> = {
+	data: [],
+	state: "idle",
+};
+
+export const INITIAL_ACTIVATE_USER_LIST: WithLoadingState<ActiveUserList> = {
 	data: [],
 	state: "idle",
 };

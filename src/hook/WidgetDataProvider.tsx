@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import CustomError from "src/util/CustomError";
 import getProject from "src/api/project/getProject";
 import getSpot from "src/api/spot/getSpot";
@@ -10,13 +9,18 @@ import Project from "src/type/Project";
 import SqlStatistics from "src/type/SqlStatistics";
 import UtilDate from "src/util/UtilDate";
 import WithLoadingState from "src/type/WithLoadingState";
-import { ApiQueueItem, ApiQueue } from "src/api/ApiQueue";
+import { ApiQueueItem, ApiQueue, ApiQueueItemType } from "src/api/ApiQueue";
 import { createContext, ReactNode, useEffect, useState } from "react";
 import {
+	INITIAL_ACTIVATE_USER_LIST,
 	INITIAL_PROJECT,
 	INITIAL_SPOT_ITEM_LIST,
 	INITIAL_SQL_ERROR_LIST,
 } from "src/const/INITIAL_CONTEXT_DATA";
+import getActiveUserByHour, {
+	GetActiveUserByHourParams,
+} from "src/api/statistics/getActiveUserByHour";
+import ActiveUserList from "src/type/ActiveUserList";
 
 interface WidgetData {
 	project: WithLoadingState<Project>;
@@ -27,12 +31,16 @@ interface WidgetData {
 		}[]
 	>;
 	sqlErrorList: WithLoadingState<SqlStatistics[]>;
+	todayActiveUserList: WithLoadingState<ActiveUserList>;
+	yesaterdayActiveUserList: WithLoadingState<ActiveUserList>;
 }
 
 export const WidgetDataContext = createContext<WidgetData>({
 	project: INITIAL_PROJECT,
 	spotItemList: INITIAL_SPOT_ITEM_LIST,
 	sqlErrorList: INITIAL_SQL_ERROR_LIST,
+	todayActiveUserList: INITIAL_ACTIVATE_USER_LIST,
+	yesaterdayActiveUserList: INITIAL_ACTIVATE_USER_LIST,
 });
 
 export default function WidgetDataProvider({
@@ -56,7 +64,15 @@ export default function WidgetDataProvider({
 		WithLoadingState<SqlStatistics[]>
 	>(INITIAL_SQL_ERROR_LIST);
 
-	const changeState = (key: string, nextState: LoadingState) => {
+	const [todayActiveUserList, setTodayActiveUserList] = useState<
+		WithLoadingState<ActiveUserList>
+	>(INITIAL_ACTIVATE_USER_LIST);
+
+	const [yesaterdayActiveUserList, setYesaterdayActiveUserList] = useState<
+		WithLoadingState<ActiveUserList>
+	>(INITIAL_ACTIVATE_USER_LIST);
+
+	const changeState = (key: ApiQueueItemType, nextState: LoadingState) => {
 		switch (key) {
 			case "PROJECT_INFO": {
 				setProject((prevProject) => ({ ...prevProject, state: nextState }));
@@ -64,16 +80,32 @@ export default function WidgetDataProvider({
 			}
 
 			case "INFOMATIC": {
-				setSpotItemList((prevSpotItemList) => ({
-					...prevSpotItemList,
+				setSpotItemList((prevState) => ({
+					...prevState,
 					state: nextState,
 				}));
 				break;
 			}
 
 			case "SQL_ERROR": {
-				setSqlErrorList((prevSqlErrorList) => ({
-					...prevSqlErrorList,
+				setSqlErrorList((prevState) => ({
+					...prevState,
+					state: nextState,
+				}));
+				break;
+			}
+
+			case "TODAY_ACTIVATE_USER": {
+				setTodayActiveUserList((prevState) => ({
+					data: prevState?.data ?? [],
+					state: nextState,
+				}));
+				break;
+			}
+
+			case "YESTERDAY_ACTIVATE_USER": {
+				setYesaterdayActiveUserList((prevState) => ({
+					data: prevState?.data ?? [],
 					state: nextState,
 				}));
 				break;
@@ -88,7 +120,7 @@ export default function WidgetDataProvider({
 	};
 
 	useEffect(() => {
-		const reducer = async ({ type, params, body }: ApiQueueItem) => {
+		const reducer = async ({ type, params, retry }: ApiQueueItem) => {
 			changeState(type, "loading");
 
 			try {
@@ -144,32 +176,69 @@ export default function WidgetDataProvider({
 								) ?? [],
 							state: "success",
 						});
+						break;
+					}
+
+					case "TODAY_ACTIVATE_USER": {
+						const parsedParms = params as GetActiveUserByHourParams;
+						const res = await getActiveUserByHour(parsedParms);
+
+						setTodayActiveUserList({
+							data: res.data.map((d) => ({
+								date: UtilDate.dateBumberToHHmm(d[0]),
+								activeUser: d[1],
+								dayType: "오늘",
+							})),
+							state: "success",
+						});
+						break;
+					}
+
+					case "YESTERDAY_ACTIVATE_USER": {
+						const parsedParms = params as GetActiveUserByHourParams;
+						const res = await getActiveUserByHour(parsedParms);
+
+						setYesaterdayActiveUserList({
+							data: res.data.map((d) => ({
+								date: UtilDate.dateBumberToHHmm(d[0]),
+								activeUser: d[1],
+								dayType: "어제",
+							})),
+							state: "success",
+						});
+						break;
 					}
 				}
 			} catch (error) {
 				changeState(type, "error");
+				originApiQueue.unshift({ type, params, retry: (retry ?? 0) + 1 });
 			}
 		};
 
-		const originApiQueue = new ApiQueue({
+		var originApiQueue = new ApiQueue({
 			invervalMs: 5000,
 			queueMaxLength: 100,
-			workByInterval: 5,
+			workByInterval: 10,
 			reducer,
 		});
 
-		originApiQueue.push({
-			type: "PROJECT_INFO",
-		});
-		originApiQueue.push({
-			type: "INFOMATIC",
-		});
-
 		const { stime, etime } = UtilDate.getTodayStimeEtime();
-		originApiQueue.push({
-			type: "SQL_ERROR",
-			params: { stime, etime },
-		});
+		const { stime: yesterdayStime, etime: yesterdayEtime } =
+			UtilDate.getYesterdayStimeEtime(stime);
+
+		originApiQueue.initPushSchedule([
+			{ type: "PROJECT_INFO" },
+			{ type: "INFOMATIC" },
+			{
+				type: "SQL_ERROR",
+				params: { stime, etime },
+			},
+			{ type: "TODAY_ACTIVATE_USER", params: { stime, etime } },
+			{
+				type: "YESTERDAY_ACTIVATE_USER",
+				params: { stime: yesterdayStime, etime: yesterdayEtime },
+			},
+		]);
 
 		originApiQueue.startFlush();
 
@@ -184,6 +253,8 @@ export default function WidgetDataProvider({
 				project,
 				spotItemList,
 				sqlErrorList,
+				todayActiveUserList,
+				yesaterdayActiveUserList,
 			}}
 		>
 			<>{children}</>
