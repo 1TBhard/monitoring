@@ -5,7 +5,7 @@ import ActiveUserList from "src/type/ActiveUserList";
 import DateStatics from "src/type/DateStatics";
 
 export const INITIAL_PROJECT: WithLoadingState<Project> = {
-	state: "idle",
+	state: "init",
 	data: {
 		platform: "",
 		createTime: "",
@@ -24,7 +24,7 @@ export const INITIAL_SPOT_ITEM_LIST: WithLoadingState<
 		Indicator: number;
 	}[]
 > = {
-	state: "idle",
+	state: "init",
 	data: [
 		{
 			subTitle: "총 에이전트",
@@ -47,22 +47,22 @@ export const INITIAL_SPOT_ITEM_LIST: WithLoadingState<
 
 export const INITIAL_SQL_ERROR_LIST: WithLoadingState<SqlStatistics[]> = {
 	data: [],
-	state: "idle",
+	state: "init",
 };
 
 export const INITIAL_ACTIVATE_USER_LIST: WithLoadingState<ActiveUserList> = {
 	data: [],
-	state: "idle",
+	state: "init",
 };
 
 export const INITIAL_TPS_LIST: WithLoadingState<DateStatics<number>[]> = {
 	data: [],
-	state: "idle",
+	state: "init",
 };
 
 export const INITIAL_AVG_RESPONSE_TIME_LIST: WithLoadingState<
 	DateStatics<number>[]
 > = {
 	data: [],
-	state: "idle",
+	state: "init",
 };

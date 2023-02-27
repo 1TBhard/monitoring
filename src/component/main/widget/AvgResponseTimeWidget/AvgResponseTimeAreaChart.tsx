@@ -18,7 +18,7 @@ function AvgResponseTimeAreaChart({
 	avgResTimeList,
 	state,
 }: AvgResponseTimeAreaChartProps) {
-	const isLoading = state === "loading";
+	const isLoading = state === "init";
 	const isError = state === "error";
 
 	const areaConfig: AreaConfig = {

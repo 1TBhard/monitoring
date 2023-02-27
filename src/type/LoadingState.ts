@@ -1,3 +1,3 @@
-type LoadingState = "idle" | "loading" | "error" | "success";
+type LoadingState = "init" | "error" | "success";
 
 export default LoadingState;

@@ -3,11 +3,11 @@ import DateStatics from "src/type/DateStatics";
 import ErrorWrapper from "src/component/common/ErrorWrapper";
 import LoadingState from "src/type/LoadingState";
 import UtilDate from "src/util/UtilDate";
+import UtilList from "src/util/UtilList";
 import { Area, AreaConfig } from "@ant-design/charts";
 import { LOAD_FAIL } from "src/const/MESSAGE";
-import { TPS_CAHRT_1_MIN_INTERVAL } from "src/const/STATISTICS";
 import { memo } from "react";
-import UtilList from "src/util/UtilList";
+import { TPS_CAHRT } from "src/const/STATISTICS";
 
 interface TpsAreaChartProps {
 	tpsList: DateStatics<number>[];
@@ -15,7 +15,7 @@ interface TpsAreaChartProps {
 }
 
 function TpsAreaChart({ tpsList, state }: TpsAreaChartProps) {
-	const isLoading = state === "loading";
+	const isLoading = state === "init";
 	const isError = state === "error";
 
 	const areaConfig: AreaConfig = {
@@ -26,7 +26,7 @@ function TpsAreaChart({ tpsList, state }: TpsAreaChartProps) {
 		isStack: false,
 		animation: false,
 		xAxis: {
-			tickCount: tpsList.length / TPS_CAHRT_1_MIN_INTERVAL,
+			tickCount: tpsList.length / TPS_CAHRT.DATA_NUMS_BY_1_MIN,
 			label: {
 				formatter: (timeString: string) =>
 					UtilDate.getHHmmFromTimeString(timeString),

@@ -16,8 +16,8 @@ function ActiveUserWidgetContent({
 	yesaterdayActiveUserList,
 }: ActiveUserWidgetContentProps) {
 	const isLoading =
-		todayActiveUserList.state === "loading" ||
-		yesaterdayActiveUserList.state === "loading";
+		todayActiveUserList.state === "init" ||
+		yesaterdayActiveUserList.state === "init";
 
 	const isError =
 		todayActiveUserList.state === "error" ||
@@ -62,10 +62,10 @@ function ActiveUserWidgetContent({
 
 export default memo(ActiveUserWidgetContent, (prevProps, nextProps) => {
 	return (
-		// prevProps.yesaterdayActiveUserList.state ===
-		// 	nextProps.yesaterdayActiveUserList.state &&
-		// prevProps.todayActiveUserList.state ===
-		// 	nextProps.todayActiveUserList.state &&
+		prevProps.yesaterdayActiveUserList.state ===
+			nextProps.yesaterdayActiveUserList.state &&
+		prevProps.todayActiveUserList.state ===
+			nextProps.todayActiveUserList.state &&
 		prevProps.yesaterdayActiveUserList.data.length ===
 			nextProps.yesaterdayActiveUserList.data.length &&
 		prevProps.todayActiveUserList.data.length ===

@@ -25,7 +25,10 @@ interface SqlErrorBarChartProps {
 }
 
 function SqlErrorBarChart({ sqlStatistics, state }: SqlErrorBarChartProps) {
-	if (state === "error") {
+	const isLoading = state === "init";
+	const isError = state === "error";
+
+	if (isError) {
 		return <>{LOAD_FAIL}</>;
 	}
 
@@ -34,7 +37,7 @@ function SqlErrorBarChart({ sqlStatistics, state }: SqlErrorBarChartProps) {
 	}
 
 	return (
-		<CustomLoading spinning={state === "loading"}>
+		<CustomLoading spinning={isLoading}>
 			<Bar {...barConfig} data={sqlStatistics} />
 		</CustomLoading>
 	);

@@ -17,7 +17,10 @@ function InfomaticWidgetContent({
 	state,
 	spotItemList,
 }: InfomaticWidgetContentProps) {
-	if (state === "error") {
+	const isLoading = state === "init";
+	const isError = state === "error";
+
+	if (isError) {
 		return <>{LOAD_FAIL}</>;
 	}
 
@@ -26,7 +29,7 @@ function InfomaticWidgetContent({
 	}
 
 	return (
-		<CustomLoading spinning={state === "loading"}>
+		<CustomLoading spinning={isLoading}>
 			{spotItemList.map((item) => (
 				<Styled.Item key={item.subTitle}>
 					<Styled.SubTitle>{item.subTitle}</Styled.SubTitle>
