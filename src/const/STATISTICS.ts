@@ -24,3 +24,5 @@ export const AVG_RESPONSE_TIME_CAHRT = {
 };
 
 export const CALL_BIAS_SECONDS = -20;
+
+export const MAX_RETRY_API_QUEUE_ITEM = 3;

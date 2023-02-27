@@ -1,22 +1,29 @@
+import { MAX_RETRY_API_QUEUE_ITEM } from "src/const/STATISTICS";
 import CustomError from "src/util/CustomError";
 
+export type ApiQueueItemType =
+	| "PROJECT_INFO"
+	| "TODAY_ACTIVATE_USER"
+	| "YESTERDAY_ACTIVATE_USER"
+	| "SQL_ERROR"
+	| "AVG_RESPONSE_TIME"
+	| "INFOMATIC";
+
 export interface ApiQueueItem {
-	type:
-		| "PROJECT_INFO"
-		| "ACTIVATE_USER"
-		| "SQL_ERROR"
-		| "AVG_RESPONSE_TIME"
-		| "INFOMATIC";
+	type: ApiQueueItemType;
 	params?: object;
 	body?: object;
+	retry?: number;
+	maxRetry?: number;
 }
 
 export class ApiQueue {
 	queue: ApiQueueItem[];
 	queueMaxLength: number; // 큐 최대 길이
 	workByInterval: number; // interval 당 처리할 수
-	invervalMs: number; // interval MS
-	interverObject?: NodeJS.Timeout; // interval 객체
+	intervalMs: number; // interval MS
+	popSchedule?: NodeJS.Timeout; // 큐를 비우는 객체
+	pushShedule?: NodeJS.Timeout; // 큐를 채우는 객체
 	reducer: (apiCall: ApiQueueItem) => void; // 리듀서(행동을 결정)
 
 	constructor({
@@ -33,7 +40,7 @@ export class ApiQueue {
 		this.queue = [];
 		this.queueMaxLength = queueMaxLength;
 		this.workByInterval = workByInterval;
-		this.invervalMs = invervalMs;
+		this.intervalMs = invervalMs;
 		this.reducer = reducer;
 	}
 
@@ -45,13 +52,25 @@ export class ApiQueue {
 		return this.queue.length === 0;
 	}
 
-	push(apiCall: ApiQueueItem) {
+	push({
+		type,
+		body,
+		params,
+		retry = 0,
+		maxRetry = MAX_RETRY_API_QUEUE_ITEM,
+	}: ApiQueueItem) {
 		if (this.isLimitLength()) {
 			throw new CustomError({
 				customErrorMessage: `ApiQueue가 최대 길이 ${this.queueMaxLength}를 벗어남`,
 			});
 		}
-		this.queue.push(apiCall);
+		this.queue.push({ type, body, params, retry, maxRetry });
+	}
+
+	unshift(apiCall: ApiQueueItem) {
+		if (apiCall.retry === apiCall.maxRetry) return;
+
+		this.queue.unshift(apiCall);
 	}
 
 	/**
@@ -67,33 +86,52 @@ export class ApiQueue {
 		this.reducer(work);
 	}
 
+	initPushSchedule(apiCallList: ApiQueueItem[]) {
+		this.queue.push(...apiCallList);
+
+		const pushInterval = () => {
+			if (this.isLimitLength()) {
+				throw new CustomError({
+					customErrorMessage: `ApiQueue가 최대 길이 ${this.queueMaxLength}를 벗어남`,
+				});
+			}
+
+			this.queue.push(...apiCallList);
+			this.pushShedule = setTimeout(pushInterval, this.intervalMs);
+		};
+
+		this.pushShedule = setTimeout(pushInterval, this.intervalMs);
+	}
+
 	/**
 	 * @description workByInterval 만큼 큐를 비운다.
 	 */
-	private flush() {
+	flush() {
 		for (let i = 0; i < this.workByInterval; i++) {
 			this.pop();
 		}
 	}
 
+	/**
+	 * flush를 스케줄로 등록한다.
+	 */
 	startFlush() {
-		this.flush();
-
-		this.interverObject = setTimeout(() => {
+		const popInterval = () => {
 			this.flush();
-			this.interverObject = setTimeout(
-				() => this.flush.call(this),
-				this.invervalMs
-			);
-		}, this.invervalMs);
+			this.popSchedule = setTimeout(popInterval, this.intervalMs);
+		};
+
+		this.flush();
+		this.popSchedule = setTimeout(popInterval, this.intervalMs);
 	}
 
 	stopFlush() {
-		clearTimeout(this.interverObject);
+		clearTimeout(this.popSchedule);
+		clearTimeout(this.pushShedule);
 	}
 
 	clearFlush() {
-		clearTimeout(this.interverObject);
+		this.stopFlush();
 		this.queue = [];
 	}
 }
