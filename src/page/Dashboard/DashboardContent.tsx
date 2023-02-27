@@ -1,5 +1,6 @@
 import { memo } from "react";
 import MainLayout from "src/component/common/MainLayout";
+import ActiveUserWidget from "src/component/main/widget/ActiveUserWidget";
 // import ActiveUserWidget from "src/component/main/widget/ActiveUserWidget";
 // import AvgResponseTimeWidget from "src/component/main/widget/AvgResponseTimeWidget";
 import InfomaticWidget from "src/component/main/widget/InfomaticWidget";
@@ -14,8 +15,8 @@ function DashboardContent({ title }: { title: string }) {
 				<InfomaticWidget />
 				<SqlErrorWidget />
 				{/* TODO 주석 해제하기 */}
-				{/* <ActiveUserWidget />
-				<TpsWidget />
+				<ActiveUserWidget />
+				{/* <TpsWidget />
 				<AvgResponseTimeWidget /> */}
 			</Styled.GridFrame>
 		</MainLayout>
