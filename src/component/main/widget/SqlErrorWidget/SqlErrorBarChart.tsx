@@ -3,6 +3,8 @@ import SqlStatistics from "src/type/SqlStatistics";
 import { Bar, BarConfig } from "@ant-design/charts";
 import { LOAD_FAIL, NO_DATA } from "src/const/MESSAGE";
 import LoadingState from "src/type/LoadingState";
+import { memo } from "react";
+import UtilList from "src/util/UtilList";
 
 const barConfig: Omit<BarConfig, "data"> = {
 	xField: "count_error",
@@ -22,10 +24,7 @@ interface SqlErrorBarChartProps {
 	state: LoadingState;
 }
 
-export default function SqlErrorBarChart({
-	sqlStatistics,
-	state,
-}: SqlErrorBarChartProps) {
+function SqlErrorBarChart({ sqlStatistics, state }: SqlErrorBarChartProps) {
 	if (state === "error") {
 		return <>{LOAD_FAIL}</>;
 	}
@@ -40,3 +39,10 @@ export default function SqlErrorBarChart({
 		</CustomLoading>
 	);
 }
+
+export default memo(SqlErrorBarChart, (prevProps, nextProps) => {
+	return (
+		prevProps.state === nextProps.state &&
+		UtilList.isEqual(prevProps.sqlStatistics, nextProps.sqlStatistics)
+	);
+});
