@@ -14,8 +14,7 @@ export interface ApiQueueItem {
 	type: ApiQueueItemType;
 	params?: object;
 	body?: object;
-	retry?: number;
-	maxRetry?: number;
+	remainRetry: number;
 }
 
 export class ApiQueue {
@@ -23,72 +22,110 @@ export class ApiQueue {
 	queueMaxLength: number; // 큐 최대 길이
 	workByInterval: number; // interval 당 처리할 수
 	intervalMs: number; // interval MS
-	popSchedule?: NodeJS.Timeout; // 큐를 비우는 객체
-	pushShedule?: NodeJS.Timeout; // 큐를 채우는 객체
+	popSchedule?: NodeJS.Timeout; // 큐를 비우는 Timeout 객체
+	pushShedule?: NodeJS.Timeout; // 큐를 채우는 Timeout 객체
+	apiCallList: ApiQueueItem[]; // interval 하게 동작할 apiCall 리스트
 	reducer: (apiCall: ApiQueueItem) => void; // 리듀서(행동을 결정)
+	workingKeySet!: Set<string>; // 현재 동작중인 apiCall 리스트, api 호출 순서를 보장하기 위해 사용
 
 	constructor({
 		queueMaxLength,
 		workByInterval,
 		invervalMs,
+		apiCallList,
 		reducer,
 	}: {
 		queueMaxLength: number;
 		workByInterval: number;
 		invervalMs: number;
-		reducer: (apiCall: ApiQueueItem) => void;
+		apiCallList: ApiQueueItem[];
+		reducer: (apiCall: ApiQueueItem) => Promise<void>;
 	}) {
 		this.queue = [];
 		this.queueMaxLength = queueMaxLength;
 		this.workByInterval = workByInterval;
 		this.intervalMs = invervalMs;
+		this.apiCallList = apiCallList;
 		this.reducer = reducer;
+		this.workingKeySet = new Set();
 	}
 
-	isLimitLength() {
+	/**
+	 * @description 큐의 최대 아이템 수 이상 여부를 반환
+	 */
+	private isLimitLength() {
 		return this.queue.length >= this.queueMaxLength;
 	}
 
+	/**
+	 * @description queue가 비었는지 여부를 반환
+	 */
 	isEmpty() {
 		return this.queue.length === 0;
 	}
 
-	push({
-		type,
-		body,
-		params,
-		retry = 0,
-		maxRetry = MAX_RETRY_API_QUEUE_ITEM,
-	}: ApiQueueItem) {
+	/**
+	 * @description ApiQueueItem 을 queue 에 삽입한다.
+	 */
+	private push(
+		{ type, body, params, remainRetry }: ApiQueueItem,
+		pushFirst: boolean = false
+	) {
 		if (this.isLimitLength()) {
-			throw new CustomError({
-				customErrorMessage: `ApiQueue가 최대 길이 ${this.queueMaxLength}를 벗어남`,
-			});
+			const msg = `ApiQueue가 최대 길이 ${this.queueMaxLength}를 벗어남`;
+			console.error(msg);
+			return;
 		}
-		this.queue.push({ type, body, params, retry, maxRetry });
-	}
 
-	unshift(apiCall: ApiQueueItem) {
-		if (apiCall.retry === apiCall.maxRetry) return;
-
-		this.queue.unshift(apiCall);
+		if (pushFirst) {
+			this.queue.unshift({
+				type,
+				body,
+				params,
+				remainRetry,
+			});
+		} else {
+			this.queue.push({ type, body, params, remainRetry });
+		}
 	}
 
 	/**
 	 * @description queue에선 pop된 요소가 reducer에 의해 실행
 	 */
-	private pop() {
+	unshift(apiCall: ApiQueueItem) {
+		if (apiCall.remainRetry <= 0) return;
+
+		this.push(apiCall, true);
+	}
+
+	/**
+	 * @description queue에선 pop된 요소가 reducer에 의해 실행
+	 */
+	private async pop() {
 		if (this.isEmpty()) {
 			return;
 		}
 
 		const work = this.queue.pop()!;
 
-		this.reducer(work);
+		if (this.isWorking(work.type)) {
+			console.info(`${work.type}은 이미 실행중입니다.`);
+			this.unshift(work);
+			return;
+		}
+
+		this.addWorking(work.type);
+		await this.reducer(work);
+		this.removeWorking(work.type);
 	}
 
-	initPushSchedule(apiCallList: ApiQueueItem[]) {
-		this.queue.push(...apiCallList);
+	/**
+	 * @description 지정한 apiCallList들을 queue에 inverval 하게 삽입
+	 */
+	private startPushInterval() {
+		this.apiCallList.forEach((apiCall) => {
+			this.push(apiCall);
+		});
 
 		const pushInterval = () => {
 			if (this.isLimitLength()) {
@@ -97,7 +134,9 @@ export class ApiQueue {
 				});
 			}
 
-			this.queue.push(...apiCallList);
+			this.apiCallList.forEach((apiCall) => {
+				this.push(apiCall);
+			});
 			this.pushShedule = setTimeout(pushInterval, this.intervalMs);
 		};
 
@@ -107,7 +146,7 @@ export class ApiQueue {
 	/**
 	 * @description workByInterval 만큼 큐를 비운다.
 	 */
-	flush() {
+	private flush() {
 		for (let i = 0; i < this.workByInterval; i++) {
 			this.pop();
 		}
@@ -116,7 +155,7 @@ export class ApiQueue {
 	/**
 	 * flush를 스케줄로 등록한다.
 	 */
-	startFlush() {
+	private startFlush() {
 		const popInterval = () => {
 			this.flush();
 			this.popSchedule = setTimeout(popInterval, this.intervalMs);
@@ -126,13 +165,31 @@ export class ApiQueue {
 		this.popSchedule = setTimeout(popInterval, this.intervalMs);
 	}
 
-	stopFlush() {
+	stop() {
 		clearTimeout(this.popSchedule);
 		clearTimeout(this.pushShedule);
 	}
 
-	clearFlush() {
-		this.stopFlush();
+	start() {
+		this.startPushInterval();
+		this.startFlush();
+	}
+
+	clear() {
+		this.stop();
 		this.queue = [];
+		this.apiCallList = [];
+	}
+
+	isWorking(type: ApiQueueItemType) {
+		return this.workingKeySet.has(type);
+	}
+
+	addWorking(type: ApiQueueItemType) {
+		this.workingKeySet.add(type);
+	}
+
+	removeWorking(type: ApiQueueItemType) {
+		this.workingKeySet.delete(type);
 	}
 }
