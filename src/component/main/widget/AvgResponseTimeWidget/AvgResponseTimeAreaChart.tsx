@@ -1,13 +1,25 @@
 import CustomLoading from "src/component/common/CustomLoading";
+import DateStatics from "src/type/DateStatics";
 import ErrorWrapper from "src/component/common/ErrorWrapper";
-import useAvgResponseTime from "src/hook/spot/useAvgResponseTime";
+import LoadingState from "src/type/LoadingState";
 import UtilDate from "src/util/UtilDate";
 import { Area, AreaConfig } from "@ant-design/charts";
 import { AVG_RESPONSE_TIME_CAHRT } from "src/const/STATISTICS";
 import { LOAD_FAIL } from "src/const/MESSAGE";
+import { memo } from "react";
+import UtilList from "src/util/UtilList";
 
-export default function AvgResponseTimeAreaChart() {
-	const { avgResTimeList, isError, isLoading } = useAvgResponseTime();
+interface AvgResponseTimeAreaChartProps {
+	avgResTimeList: DateStatics<number>[];
+	state: LoadingState;
+}
+
+function AvgResponseTimeAreaChart({
+	avgResTimeList,
+	state,
+}: AvgResponseTimeAreaChartProps) {
+	const isLoading = state === "init";
+	const isError = state === "error";
 
 	const areaConfig: AreaConfig = {
 		data: avgResTimeList,
@@ -55,3 +67,10 @@ export default function AvgResponseTimeAreaChart() {
 		</CustomLoading>
 	);
 }
+
+export default memo(AvgResponseTimeAreaChart, (preProps, nextProps) => {
+	return (
+		preProps.state === nextProps.state &&
+		UtilList.isEqual(preProps.avgResTimeList, nextProps.avgResTimeList)
+	);
+});

@@ -1,13 +1,22 @@
 import CustomLoading from "src/component/common/CustomLoading";
+import DateStatics from "src/type/DateStatics";
 import ErrorWrapper from "src/component/common/ErrorWrapper";
-import useTps from "src/hook/spot/useTps";
+import LoadingState from "src/type/LoadingState";
 import UtilDate from "src/util/UtilDate";
+import UtilList from "src/util/UtilList";
 import { Area, AreaConfig } from "@ant-design/charts";
 import { LOAD_FAIL } from "src/const/MESSAGE";
-import { TPS_CAHRT_1_MIN_INTERVAL } from "src/const/STATISTICS";
+import { memo } from "react";
+import { TPS_CAHRT } from "src/const/STATISTICS";
 
-export default function TpsAreaChart() {
-	const { tpsList, isError, isLoading } = useTps();
+interface TpsAreaChartProps {
+	tpsList: DateStatics<number>[];
+	state: LoadingState;
+}
+
+function TpsAreaChart({ tpsList, state }: TpsAreaChartProps) {
+	const isLoading = state === "init";
+	const isError = state === "error";
 
 	const areaConfig: AreaConfig = {
 		data: tpsList,
@@ -17,7 +26,7 @@ export default function TpsAreaChart() {
 		isStack: false,
 		animation: false,
 		xAxis: {
-			tickCount: tpsList.length / TPS_CAHRT_1_MIN_INTERVAL,
+			tickCount: tpsList.length / TPS_CAHRT.DATA_NUMS_BY_1_MIN,
 			label: {
 				formatter: (timeString: string) =>
 					UtilDate.getHHmmFromTimeString(timeString),
@@ -52,3 +61,10 @@ export default function TpsAreaChart() {
 		</CustomLoading>
 	);
 }
+
+export default memo(TpsAreaChart, (prevProps, nextProps) => {
+	return (
+		UtilList.isEqual(prevProps.tpsList, nextProps.tpsList) &&
+		prevProps.state === nextProps.state
+	);
+});

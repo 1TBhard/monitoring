@@ -9,17 +9,18 @@
   - [설치 및 실행환경](#설치-및-실행환경)
   - [과제 요구 사항](#과제-요구-사항)
     - [1주차 피드백](#1주차-피드백)
+    - [2주차 피드백](#2주차-피드백)
   - [제약 조건](#제약-조건)
   - [주요 프레임워크 및 라이브러리](#주요-프레임워크-및-라이브러리)
   - [폴더 구조](#폴더-구조)
   - [주안점](#주안점)
     - [1. 모니터링 서비스로 어떤 것을 사용자에게 제공해야 할까요? 🤔](#1-모니터링-서비스로-어떤-것을-사용자에게-제공해야-할까요-)
     - [2. 컴포넌트 렌더링 최적화 🧹](#2-컴포넌트-렌더링-최적화-)
-      - [2-1. cache를 이용한다](#2-1-cache를-이용한다)
-      - [2-2 데이터와 컴포넌트 로직을 분리한다](#2-2-데이터와-컴포넌트-로직을-분리한다)
+      - [2-1 데이터와 컴포넌트 로직을 분리한다](#2-1-데이터와-컴포넌트-로직을-분리한다)
+      - [2-2. 데이터의 호출을 제한한다](#2-2-데이터의-호출을-제한한다)
     - [3. 유지보수에 힘쓰기 🤝](#3-유지보수에-힘쓰기-)
     - [4. 리버스 프록시로 CORS 해결 🛠](#4-리버스-프록시로-cors-해결-)
-    - [5. 단발성 호출 api를 이용하여 차트 그리기](#5-단발성-호출-api를-이용하여-차트-그리기)
+    - [5. 단발성 호출 api를 이용하여 차트 그리기 📈](#5-단발성-호출-api를-이용하여-차트-그리기-)
 
 <br/>
 
@@ -72,8 +73,13 @@ yarn start
   - [x] 응답시간 라인 차트 위젯
   - [x] Spot API를 활용하여 요청 전의 reponse  를 stack 하여 가져와야 합니다.
 - [x] 하루의 통계 데이터를 가져오는 API 호출시 `00:00 ~ 현재시간` 로 호출해주세요.
-- [ ] API 6개 이상 호출시 브라우저의 에러가 날 것입니다. 이를 처리해주세요.
+- [ ] API 6개 이상 호출시 에러가 날 것입니다. 이를 처리해주세요.
 - [ ] React-query를 사용하지 않고 캐시를 조작할 수 있도록 해주세요.
+
+### 2주차 피드백
+
+- [ ] API 동시호출을 제한해주세요.
+  - [ ] React-query를 제거해주세요.
 
 <br/>
 
@@ -165,46 +171,7 @@ util | 유틸리티 관련 함수들이 모인 폴더
 
 아래는 위의 문제에 대해 제가 생각한 해결책입니다.
 
-#### 2-1. cache를 이용한다
-
-데이터의 로직과 캐시를 적절히 이용하는 방법을 생각하였고 `react-query`를 사용하게 되었습니다.  
-`react-query`를 이용하면 stale과 cachetime 설정을 쉽게할 수 있습니다.  
-또한 `useQuery` 같은 hook을 제공하므로 커스텀훅으로 만들어 데이터의 로직을 모듈화하면 컴포넌트의 로직과 분리될 수 있다고 생각였습니다.
-
-```ts
-// src/hook/statistics/useActiveUserByHour.ts
-
-export default function useActiveUserByHour({
-  stime,
-  etime,
-}: UseActiveUserByHourParams) {
-  // staleTime과 cacheTime을 설정하여 캐시의 refresh 주기를 맞춘다.
-  // refetchInterval 로 연속적으로 데이터를 가져온다.
-  // notifyOnChangeProps 이용하여 "data", "error" 값이 이전과 변경된 경우 데이터가 변경됨을 알린다.
-  const { data, isLoading, isError } = useQuery({
-    queryFn: () => getActiveUserByHour({ stime, etime }),
-    queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.ACTIVE_USER, stime, etime],
-    staleTime: QUERY_COMMON.STALE_TIME,
-    cacheTime: QUERY_COMMON.CACHE_TIME,
-    retry: QUERY_COMMON.RETRY,
-    retryDelay: QUERY_COMMON.RETRY_DELAY,
-    refetchInterval: QUERY_COMMON.REFETCH_INTERVAL,
-    notifyOnChangeProps: ["data", "error"],
-  });
-
-  return {
-    activeUserList:
-      data?.data.map((d) => ({
-        date: UtilDate.dateBumberToHHmm(d[0]),
-        activeUser: d[1],
-      })) ?? [],
-    isLoading,
-    isError,
-  };
-}
-```
-
-#### 2-2 데이터와 컴포넌트 로직을 분리한다
+#### 2-1 데이터와 컴포넌트 로직을 분리한다
 
 데이터와 컴포넌트 로직이 하나로 묶여있는 경우, 유지보수가 힘듦을 경험하였습니다.  
 이에 데이터와 컴포넌트 로직을 분리하고자 하였습니다.  
@@ -218,6 +185,64 @@ export default memo(SqlErrorDetailDrawer, (prevProps, nextProps) => {
   return prevProps.isShowDrawer === nextProps.isShowDrawer;
 });
 ```
+
+#### 2-2. 데이터의 호출을 제한한다
+
+위젯이 많으질수록 데이터의 호출을 더 많이 요구하게 됩니다.  
+이때, 너무 많은 요청을 보내는 경우 `429 Error`가 발생하는 문제가 있었습니다.  
+따라서, API 호출을 제한해야 했습니다. 알려주신 힌트를 바탕으로 아래와 같이 생각하였습니다.
+
+- API 호출 제한
+  - Queue 이용하여 API 호출을 호출을 제한 및 순서대로 처리한다.
+  
+- API 호출 에러 처리
+  - 큐의 맨 앞으로 다시 push 하여 다시 처리할 수 있게 한다.
+  - 이때, 재시도 횟수를 지정하여 일정 범위를 넘게 되면 실행하지 않는다.
+
+- 구현
+  - redux처럼 Action으로 수행할 동작의 타입을 지정하고 api 호출 대한 처리를 reducer 에 위임한다.
+  - 컴포넌트로의 데이터 전달은 Context를 이용하여 전달한다.
+  - 컴포넌트에서 로딩 및 에러를 위해 api 호출에 대한 데이터의 상태를 설정한다.
+    - `type LoadingState = "init" | "error" | "success";`
+
+  ```tsx
+  // src/context/WidgetDataProvider.tsx
+
+  useEffect(() => {
+    const reducer = async ({
+      type,
+      params,
+      remainRetry: retry,
+    }: ApiQueueItem) => {
+      try {
+        switch (type) {
+          case "PROJECT_INFO": {
+            const res = await getProject();
+            setProject({
+              data: res,
+              state: "success",
+            });
+            break;
+          }
+          //...
+      }
+      //...
+    } catch (error) {
+        changeState(type, "error");
+        originApiQueue.stop();
+        console.log("error", error);
+        // startFlush 재시도
+        debounce(originApiQueue.start, 3000)();
+        // 재시도한 횟수를 더한 Queue Item으로 등록
+        originApiQueue.unshift({ type, params, remainRetry: (retry ?? 0) + 1 });
+      }
+
+  return () => {
+    // 컴포넌트 언마운트시 clear
+    originApiQueue.clear();
+    };
+  }, [])
+  ```
 
 ### 3. 유지보수에 힘쓰기 🤝
 
@@ -271,7 +296,7 @@ module.exports = function (app) {
 };
 ```
 
-### 5. 단발성 호출 api를 이용하여 차트 그리기
+### 5. 단발성 호출 api를 이용하여 차트 그리기 📈
 
 차트를 그리기 위해서는 데이터 리스트들이 필요합니다.
 

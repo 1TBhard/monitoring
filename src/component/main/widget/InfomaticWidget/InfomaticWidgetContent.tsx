@@ -1,14 +1,31 @@
-import * as Styled from "./Styled.InfomaticWidget";
+import { memo } from "react";
 import CustomLoading from "src/component/common/CustomLoading";
-import ErrorWrapper from "src/component/common/ErrorWrapper";
-import useSpot from "src/hook/spot/useSpot";
-import { LOAD_FAIL } from "src/const/MESSAGE";
+import { LOAD_FAIL, NO_DATA } from "src/const/MESSAGE";
+import UtilList from "src/util/UtilList";
+import LoadingState from "src/type/LoadingState";
+import * as Styled from "./Styled.InfomaticWidget";
 
-export default function InfomaticWidgetContent() {
-	const { spotItemList, isLoading, isError } = useSpot();
+interface InfomaticWidgetContentProps {
+	state: LoadingState;
+	spotItemList: {
+		subTitle: string;
+		Indicator: number;
+	}[];
+}
+
+function InfomaticWidgetContent({
+	state,
+	spotItemList,
+}: InfomaticWidgetContentProps) {
+	const isLoading = state === "init";
+	const isError = state === "error";
 
 	if (isError) {
-		return <ErrorWrapper errorMessage={LOAD_FAIL} isError={true} />;
+		return <>{LOAD_FAIL}</>;
+	}
+
+	if (spotItemList.length === 0) {
+		return <>{NO_DATA}</>;
 	}
 
 	return (
@@ -22,3 +39,10 @@ export default function InfomaticWidgetContent() {
 		</CustomLoading>
 	);
 }
+
+export default memo(InfomaticWidgetContent, (prevProps, nextProps) => {
+	return (
+		UtilList.isEqual(prevProps.spotItemList, nextProps.spotItemList) &&
+		prevProps.state === nextProps.state
+	);
+});

@@ -1,16 +1,31 @@
+import ActiveUserList from "src/type/ActiveUserList";
 import CustomLoading from "src/component/common/CustomLoading";
 import ErrorWrapper from "src/component/common/ErrorWrapper";
-import useActiveUserByHour from "src/hook/statistics/useActiveUserByHour";
-import UtilDate from "src/util/UtilDate";
+import WithLoadingState from "src/type/WithLoadingState";
 import { Area, AreaConfig } from "@ant-design/charts";
 import { LOAD_FAIL } from "src/const/MESSAGE";
+import { memo } from "react";
 
-export default function ActiveUserWidgetContent() {
-	const { stime, etime } = UtilDate.getTodayStimeEtime();
-	const { activeUserList, isLoading, isError } = useActiveUserByHour({
-		stime,
-		etime,
-	});
+interface ActiveUserWidgetContentProps {
+	todayActiveUserList: WithLoadingState<ActiveUserList>;
+	yesaterdayActiveUserList: WithLoadingState<ActiveUserList>;
+}
+
+function ActiveUserWidgetContent({
+	todayActiveUserList,
+	yesaterdayActiveUserList,
+}: ActiveUserWidgetContentProps) {
+	const isLoading =
+		todayActiveUserList.state === "init" ||
+		yesaterdayActiveUserList.state === "init";
+
+	const isError =
+		todayActiveUserList.state === "error" ||
+		yesaterdayActiveUserList.state === "error";
+
+	const activeUserList = todayActiveUserList.data.concat(
+		yesaterdayActiveUserList.data
+	);
 
 	const areaConfig: AreaConfig = {
 		data: activeUserList,
@@ -44,3 +59,16 @@ export default function ActiveUserWidgetContent() {
 		</CustomLoading>
 	);
 }
+
+export default memo(ActiveUserWidgetContent, (prevProps, nextProps) => {
+	return (
+		prevProps.yesaterdayActiveUserList.state ===
+			nextProps.yesaterdayActiveUserList.state &&
+		prevProps.todayActiveUserList.state ===
+			nextProps.todayActiveUserList.state &&
+		prevProps.yesaterdayActiveUserList.data.length ===
+			nextProps.yesaterdayActiveUserList.data.length &&
+		prevProps.todayActiveUserList.data.length ===
+			nextProps.todayActiveUserList.data.length
+	);
+});
