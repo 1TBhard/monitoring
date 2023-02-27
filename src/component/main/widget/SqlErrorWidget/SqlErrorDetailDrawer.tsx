@@ -77,7 +77,7 @@ function SqlErrorDetailDrawer({
 				<>{LOAD_FAIL}</>
 			) : (
 				<ResponsiveTable
-					loading={state === "loading"}
+					loading={state === "init"}
 					columns={columns}
 					dataSource={sqlStatistics}
 				/>
