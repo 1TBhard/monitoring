@@ -1,12 +1,13 @@
-import { memo } from "react";
-import MainLayout from "src/component/common/MainLayout";
+import * as Styled from "./Styled.Dashboard";
 import ActiveUserWidget from "src/component/main/widget/ActiveUserWidget";
+import InfomaticWidget from "src/component/main/widget/InfomaticWidget";
+import MainLayout from "src/component/common/MainLayout";
+import SqlErrorWidget from "src/component/main/widget/SqlErrorWidget";
+import TpsWidget from "src/component/main/widget/TpsWidget";
+import { memo } from "react";
 // import ActiveUserWidget from "src/component/main/widget/ActiveUserWidget";
 // import AvgResponseTimeWidget from "src/component/main/widget/AvgResponseTimeWidget";
-import InfomaticWidget from "src/component/main/widget/InfomaticWidget";
-import SqlErrorWidget from "src/component/main/widget/SqlErrorWidget";
 // import TpsWidget from "src/component/main/widget/TpsWidget";
-import * as Styled from "./Styled.Dashboard";
 
 function DashboardContent({ title }: { title: string }) {
 	return (
@@ -16,8 +17,8 @@ function DashboardContent({ title }: { title: string }) {
 				<SqlErrorWidget />
 				{/* TODO 주석 해제하기 */}
 				<ActiveUserWidget />
-				{/* <TpsWidget />
-				<AvgResponseTimeWidget /> */}
+				<TpsWidget />
+				{/*<AvgResponseTimeWidget /> */}
 			</Styled.GridFrame>
 		</MainLayout>
 	);
