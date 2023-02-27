@@ -265,7 +265,7 @@ export default function WidgetDataProvider({
 		var originApiQueue = new ApiQueue({
 			invervalMs: 5000,
 			queueMaxLength: 100,
-			workByInterval: 10,
+			workByInterval: 5,
 			reducer,
 		});
 
