@@ -1,6 +1,3 @@
-import { MAX_RETRY_API_QUEUE_ITEM } from "src/const/STATISTICS";
-import CustomError from "src/util/CustomError";
-
 export type ApiQueueItemType =
 	| "PROJECT_INFO"
 	| "TODAY_ACTIVATE_USER"
@@ -67,9 +64,9 @@ export class ApiQueue {
 	/**
 	 * @description ApiQueueItem 을 queue 에 삽입한다.
 	 */
-	private push(
+	private add(
 		{ type, body, params, remainRetry }: ApiQueueItem,
-		pushFirst: boolean = false
+		toBack: boolean = false
 	) {
 		if (this.isLimitLength()) {
 			const msg = `ApiQueue가 최대 길이 ${this.queueMaxLength}를 벗어남`;
@@ -77,15 +74,15 @@ export class ApiQueue {
 			return;
 		}
 
-		if (pushFirst) {
-			this.queue.unshift({
+		if (toBack) {
+			this.queue.push({
 				type,
 				body,
 				params,
 				remainRetry,
 			});
 		} else {
-			this.queue.push({ type, body, params, remainRetry });
+			this.queue.unshift({ type, body, params, remainRetry });
 		}
 	}
 
@@ -95,7 +92,7 @@ export class ApiQueue {
 	unshift(apiCall: ApiQueueItem) {
 		if (apiCall.remainRetry <= 0) return;
 
-		this.push(apiCall, true);
+		this.add(apiCall, true);
 	}
 
 	/**
@@ -124,7 +121,7 @@ export class ApiQueue {
 	 */
 	private startPushInterval() {
 		this.apiCallList.forEach((apiCall) => {
-			this.push(apiCall);
+			this.add(apiCall);
 		});
 
 		const pushInterval = () => {
@@ -133,7 +130,7 @@ export class ApiQueue {
 			}
 
 			this.apiCallList.forEach((apiCall) => {
-				this.push(apiCall);
+				this.add(apiCall);
 			});
 			this.pushShedule = setTimeout(pushInterval, this.intervalMs);
 		};
