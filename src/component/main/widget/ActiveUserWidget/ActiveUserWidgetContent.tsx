@@ -15,8 +15,6 @@ function ActiveUserWidgetContent({
 	todayActiveUserList,
 	yesaterdayActiveUserList,
 }: ActiveUserWidgetContentProps) {
-	console.log({ todayActiveUserList, yesaterdayActiveUserList });
-
 	const isLoading =
 		todayActiveUserList.state === "loading" ||
 		yesaterdayActiveUserList.state === "loading";
@@ -64,10 +62,10 @@ function ActiveUserWidgetContent({
 
 export default memo(ActiveUserWidgetContent, (prevProps, nextProps) => {
 	return (
-		prevProps.yesaterdayActiveUserList.state ===
-			nextProps.yesaterdayActiveUserList.state &&
-		prevProps.todayActiveUserList.state ===
-			nextProps.todayActiveUserList.state &&
+		// prevProps.yesaterdayActiveUserList.state ===
+		// 	nextProps.yesaterdayActiveUserList.state &&
+		// prevProps.todayActiveUserList.state ===
+		// 	nextProps.todayActiveUserList.state &&
 		prevProps.yesaterdayActiveUserList.data.length ===
 			nextProps.yesaterdayActiveUserList.data.length &&
 		prevProps.todayActiveUserList.data.length ===
