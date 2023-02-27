@@ -17,6 +17,7 @@
     - [1. 모니터링 서비스로 어떤 것을 사용자에게 제공해야 할까요? 🤔](#1-모니터링-서비스로-어떤-것을-사용자에게-제공해야-할까요-)
     - [2. 컴포넌트 렌더링 최적화 🧹](#2-컴포넌트-렌더링-최적화-)
       - [2-1 데이터와 컴포넌트 로직을 분리한다](#2-1-데이터와-컴포넌트-로직을-분리한다)
+      - [2-2. 데이터의 호출을 제한한다](#2-2-데이터의-호출을-제한한다)
     - [3. 유지보수에 힘쓰기 🤝](#3-유지보수에-힘쓰기-)
     - [4. 리버스 프록시로 CORS 해결 🛠](#4-리버스-프록시로-cors-해결-)
     - [5. 단발성 호출 api를 이용하여 차트 그리기 📈](#5-단발성-호출-api를-이용하여-차트-그리기-)
@@ -184,6 +185,64 @@ export default memo(SqlErrorDetailDrawer, (prevProps, nextProps) => {
   return prevProps.isShowDrawer === nextProps.isShowDrawer;
 });
 ```
+
+#### 2-2. 데이터의 호출을 제한한다
+
+위젯이 많으질수록 데이터의 호출을 더 많이 요구하게 됩니다.  
+이때, 너무 많은 요청을 보내는 경우 `429 Error`가 발생하는 문제가 있었습니다.  
+따라서, API 호출을 제한해야 했습니다. 알려주신 힌트를 바탕으로 아래와 같이 생각하였습니다.
+
+- API 호출 제한
+  - Queue 이용하여 API 호출을 호출을 제한 및 순서대로 처리한다.
+  
+- API 호출 에러 처리
+  - 큐의 맨 앞으로 다시 push 하여 다시 처리할 수 있게 한다.
+  - 이때, 재시도 횟수를 지정하여 일정 범위를 넘게 되면 실행하지 않는다.
+
+- 구현
+  - redux처럼 Action으로 수행할 동작의 타입을 지정하고 api 호출 대한 처리를 reducer 에 위임한다.
+  - 컴포넌트로의 데이터 전달은 Context를 이용하여 전달한다.
+  - 컴포넌트에서 로딩 및 에러를 위해 api 호출에 대한 데이터의 상태를 설정한다.
+    - `type LoadingState = "init" | "error" | "success";`
+
+  ```tsx
+  // src/context/WidgetDataProvider.tsx
+
+  useEffect(() => {
+    const reducer = async ({
+      type,
+      params,
+      remainRetry: retry,
+    }: ApiQueueItem) => {
+      try {
+        switch (type) {
+          case "PROJECT_INFO": {
+            const res = await getProject();
+            setProject({
+              data: res,
+              state: "success",
+            });
+            break;
+          }
+          //...
+      }
+      //...
+    } catch (error) {
+        changeState(type, "error");
+        originApiQueue.stop();
+        console.log("error", error);
+        // startFlush 재시도
+        debounce(originApiQueue.start, 3000)();
+        // 재시도한 횟수를 더한 Queue Item으로 등록
+        originApiQueue.unshift({ type, params, remainRetry: (retry ?? 0) + 1 });
+      }
+
+  return () => {
+    // 컴포넌트 언마운트시 clear
+    originApiQueue.clear();
+    };
+  }, [])
+  ```
 
 ### 3. 유지보수에 힘쓰기 🤝
 
