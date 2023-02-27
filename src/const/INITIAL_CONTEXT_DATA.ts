@@ -59,3 +59,10 @@ export const INITIAL_TPS_LIST: WithLoadingState<DateStatics<number>[]> = {
 	data: [],
 	state: "idle",
 };
+
+export const INITIAL_AVG_RESPONSE_TIME_LIST: WithLoadingState<
+	DateStatics<number>[]
+> = {
+	data: [],
+	state: "idle",
+};

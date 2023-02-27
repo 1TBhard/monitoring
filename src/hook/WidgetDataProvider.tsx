@@ -1,4 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import dayjs from "dayjs";
+import { debounce } from "lodash";
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { ApiQueue, ApiQueueItem, ApiQueueItemType } from "src/api/ApiQueue";
 import getProject from "src/api/project/getProject";
@@ -6,12 +8,15 @@ import getSpot from "src/api/spot/getSpot";
 import getActiveUserByHour, {
 	GetActiveUserByHourParams,
 } from "src/api/statistics/getActiveUserByHour";
+import getAvgReponseTime from "src/api/statistics/getAvgReponseTime";
 import getSqlStatistics, {
 	GetSqlStatisticsParams,
 } from "src/api/statistics/getSqlStatistics";
 import getTps from "src/api/statistics/getTps";
+import { COMMON_REMAIN_RETRY } from "src/const/API_CALL";
 import {
 	INITIAL_ACTIVATE_USER_LIST,
+	INITIAL_AVG_RESPONSE_TIME_LIST,
 	INITIAL_PROJECT,
 	INITIAL_SPOT_ITEM_LIST,
 	INITIAL_SQL_ERROR_LIST,
@@ -20,6 +25,7 @@ import {
 import {
 	AVG_RESPONSE_TIME_CAHRT,
 	CALL_BIAS_SECONDS,
+	TPS_CAHRT,
 } from "src/const/STATISTICS";
 import ActiveUserList from "src/type/ActiveUserList";
 import DateStatics from "src/type/DateStatics";
@@ -42,6 +48,7 @@ interface WidgetData {
 	todayActiveUserList: WithLoadingState<ActiveUserList>;
 	yesaterdayActiveUserList: WithLoadingState<ActiveUserList>;
 	tpsList: WithLoadingState<DateStatics<number>[]>;
+	avgResTimeList: WithLoadingState<DateStatics<number>[]>;
 }
 
 export const WidgetDataContext = createContext<WidgetData>({
@@ -51,6 +58,7 @@ export const WidgetDataContext = createContext<WidgetData>({
 	todayActiveUserList: INITIAL_ACTIVATE_USER_LIST,
 	yesaterdayActiveUserList: INITIAL_ACTIVATE_USER_LIST,
 	tpsList: INITIAL_TPS_LIST,
+	avgResTimeList: INITIAL_AVG_RESPONSE_TIME_LIST,
 });
 
 export default function WidgetDataProvider({
@@ -84,6 +92,10 @@ export default function WidgetDataProvider({
 
 	const [tpsList, setTpsList] =
 		useState<WithLoadingState<DateStatics<number>[]>>(INITIAL_TPS_LIST);
+
+	const [avgResTimeList, setAvgResTimeList] = useState<
+		WithLoadingState<DateStatics<number>[]>
+	>(INITIAL_AVG_RESPONSE_TIME_LIST);
 
 	const changeState = (key: ApiQueueItemType, nextState: LoadingState) => {
 		switch (key) {
@@ -132,6 +144,14 @@ export default function WidgetDataProvider({
 				break;
 			}
 
+			case "AVG_RESPONSE_TIME": {
+				setAvgResTimeList((prevState) => ({
+					data: prevState?.data ?? [],
+					state: nextState,
+				}));
+				break;
+			}
+
 			default: {
 				throw new CustomError({
 					customErrorMessage: "잘못된 changeState 상태",
@@ -141,7 +161,11 @@ export default function WidgetDataProvider({
 	};
 
 	useEffect(() => {
-		const reducer = async ({ type, params, retry }: ApiQueueItem) => {
+		const reducer = async ({
+			type,
+			params,
+			remainRetry: retry,
+		}: ApiQueueItem) => {
 			changeState(type, "loading");
 
 			try {
@@ -232,11 +256,15 @@ export default function WidgetDataProvider({
 
 					case "TPS": {
 						const lastTpsItem = tpsList.data[tpsList.data.length - 1];
-						const noTpsItemStartDate = dayjs()
+						const currentDate = dayjs()
 							.add(CALL_BIAS_SECONDS, "seconds")
 							.toDate();
+						const closeDateBySec = UtilDate.getCloseIntervalSecDate(
+							currentDate,
+							TPS_CAHRT.INTERVAL_SEC
+						);
 
-						const lastTime = lastTpsItem?.date ?? noTpsItemStartDate;
+						const lastTime = lastTpsItem?.date ?? closeDateBySec;
 
 						const nextStime = dayjs(lastTime).add(5, "seconds");
 						const nextEtime = dayjs(nextStime).add(5, "seconds");
@@ -247,6 +275,42 @@ export default function WidgetDataProvider({
 						});
 
 						setTpsList((prevTpsDataList) => ({
+							data: [
+								...prevTpsDataList.data,
+								{ date: nextStime.toDate(), value: res },
+							].slice(
+								TPS_CAHRT.MAX_DATA_NUMBER < prevTpsDataList.data.length
+									? prevTpsDataList.data.length - TPS_CAHRT.MAX_DATA_NUMBER
+									: 0
+							),
+							state: "success",
+						}));
+
+						break;
+					}
+
+					case "AVG_RESPONSE_TIME": {
+						const lastAvgResTimeItem =
+							avgResTimeList.data[avgResTimeList.data.length - 1];
+						const currentDate = dayjs()
+							.add(CALL_BIAS_SECONDS, "seconds")
+							.toDate();
+						const closeDateBySec = UtilDate.getCloseIntervalSecDate(
+							currentDate,
+							TPS_CAHRT.INTERVAL_SEC
+						);
+
+						const lastTime = lastAvgResTimeItem?.date ?? closeDateBySec;
+
+						const nextStime = dayjs(lastTime).add(5, "seconds");
+						const nextEtime = dayjs(nextStime).add(5, "seconds");
+
+						const res = await getAvgReponseTime({
+							stime: nextStime.toDate().getTime(),
+							etime: nextEtime.toDate().getTime(),
+						});
+
+						setAvgResTimeList((prevTpsDataList) => ({
 							data: [
 								...prevTpsDataList.data,
 								{ date: nextStime.toDate(), value: res },
@@ -266,43 +330,63 @@ export default function WidgetDataProvider({
 			} catch (error) {
 				changeState(type, "error");
 
+				originApiQueue.stop();
+
+				console.log("error", error);
+
+				// startFlush 재시도
+				debounce(originApiQueue.start, 3000)();
+
 				// 재시도한 횟수를 더한 Queue Item으로 등록
-				originApiQueue.unshift({ type, params, retry: (retry ?? 0) + 1 });
+				originApiQueue.unshift({ type, params, remainRetry: (retry ?? 0) + 1 });
 			}
 		};
-
-		var originApiQueue = new ApiQueue({
-			invervalMs: 5000,
-			queueMaxLength: 100,
-			workByInterval: 5,
-			reducer,
-		});
 
 		const { stime, etime } = UtilDate.getTodayStimeEtime();
 		const { stime: yesterdayStime, etime: yesterdayEtime } =
 			UtilDate.getYesterdayStimeEtime(stime);
 
-		originApiQueue.initPushSchedule([
-			{ type: "PROJECT_INFO" },
-			{ type: "INFOMATIC" },
-			{
-				type: "SQL_ERROR",
-				params: { stime, etime },
-			},
-			{ type: "TODAY_ACTIVATE_USER", params: { stime, etime } },
-			{
-				type: "YESTERDAY_ACTIVATE_USER",
-				params: { stime: yesterdayStime, etime: yesterdayEtime },
-			},
-			{
-				type: "TPS",
-			},
-		]);
+		var originApiQueue = new ApiQueue({
+			invervalMs: 5000,
+			queueMaxLength: 100,
+			workByInterval: 5,
+			apiCallList: [
+				{ type: "PROJECT_INFO", remainRetry: COMMON_REMAIN_RETRY },
+				{ type: "INFOMATIC", remainRetry: COMMON_REMAIN_RETRY },
+				{
+					type: "SQL_ERROR",
+					params: { stime, etime },
+					remainRetry: COMMON_REMAIN_RETRY,
+				},
+				{
+					type: "TODAY_ACTIVATE_USER",
+					params: { stime, etime },
+					remainRetry: COMMON_REMAIN_RETRY,
+				},
+				{
+					type: "YESTERDAY_ACTIVATE_USER",
+					params: {
+						stime: yesterdayStime,
+						etime: yesterdayEtime,
+					},
+					remainRetry: COMMON_REMAIN_RETRY,
+				},
+				{
+					type: "TPS",
+					remainRetry: COMMON_REMAIN_RETRY,
+				},
+				{
+					type: "AVG_RESPONSE_TIME",
+					remainRetry: COMMON_REMAIN_RETRY,
+				},
+			],
+			reducer,
+		});
 
-		originApiQueue.startFlush();
+		originApiQueue.start();
 
 		return () => {
-			originApiQueue.clearFlush();
+			originApiQueue.clear();
 		};
 	}, []);
 
@@ -315,6 +399,7 @@ export default function WidgetDataProvider({
 				todayActiveUserList,
 				yesaterdayActiveUserList,
 				tpsList,
+				avgResTimeList,
 			}}
 		>
 			<>{children}</>
