@@ -13,7 +13,12 @@ import getSqlStatistics, {
 	GetSqlStatisticsParams,
 } from "src/api/statistics/getSqlStatistics";
 import getTps from "src/api/statistics/getTps";
-import { COMMON_REMAIN_RETRY } from "src/const/API_CALL";
+import {
+	API_QUEUE_MAX_LENGTH,
+	COMMON_INVERVAL_MS,
+	COMMON_REMAIN_RETRY,
+	WORK_BY_INTERVAL,
+} from "src/const/API_CALL";
 import {
 	INITIAL_ACTIVATE_USER_LIST,
 	INITIAL_AVG_RESPONSE_TIME_LIST,
@@ -166,8 +171,6 @@ export default function WidgetDataProvider({
 			params,
 			remainRetry: retry,
 		}: ApiQueueItem) => {
-			changeState(type, "loading");
-
 			try {
 				switch (type) {
 					case "PROJECT_INFO": {
@@ -347,9 +350,9 @@ export default function WidgetDataProvider({
 			UtilDate.getYesterdayStimeEtime(stime);
 
 		var originApiQueue = new ApiQueue({
-			invervalMs: 5000,
-			queueMaxLength: 100,
-			workByInterval: 5,
+			invervalMs: COMMON_INVERVAL_MS,
+			queueMaxLength: API_QUEUE_MAX_LENGTH,
+			workByInterval: WORK_BY_INTERVAL,
 			apiCallList: [
 				{ type: "PROJECT_INFO", remainRetry: COMMON_REMAIN_RETRY },
 				{ type: "INFOMATIC", remainRetry: COMMON_REMAIN_RETRY },
