@@ -1,26 +1,31 @@
-import CustomError from "src/util/CustomError";
+import dayjs from "dayjs";
+import { createContext, ReactNode, useEffect, useState } from "react";
+import { ApiQueue, ApiQueueItem, ApiQueueItemType } from "src/api/ApiQueue";
 import getProject from "src/api/project/getProject";
 import getSpot from "src/api/spot/getSpot";
+import getActiveUserByHour, {
+	GetActiveUserByHourParams,
+} from "src/api/statistics/getActiveUserByHour";
 import getSqlStatistics, {
 	GetSqlStatisticsParams,
 } from "src/api/statistics/getSqlStatistics";
-import LoadingState from "src/type/LoadingState";
-import Project from "src/type/Project";
-import SqlStatistics from "src/type/SqlStatistics";
-import UtilDate from "src/util/UtilDate";
-import WithLoadingState from "src/type/WithLoadingState";
-import { ApiQueueItem, ApiQueue, ApiQueueItemType } from "src/api/ApiQueue";
-import { createContext, ReactNode, useEffect, useState } from "react";
+import getTps from "src/api/statistics/getTps";
 import {
 	INITIAL_ACTIVATE_USER_LIST,
 	INITIAL_PROJECT,
 	INITIAL_SPOT_ITEM_LIST,
 	INITIAL_SQL_ERROR_LIST,
+	INITIAL_TPS_LIST,
 } from "src/const/INITIAL_CONTEXT_DATA";
-import getActiveUserByHour, {
-	GetActiveUserByHourParams,
-} from "src/api/statistics/getActiveUserByHour";
+import { CALL_BIAS_SECONDS } from "src/const/STATISTICS";
 import ActiveUserList from "src/type/ActiveUserList";
+import DateStatics from "src/type/DateStatics";
+import LoadingState from "src/type/LoadingState";
+import Project from "src/type/Project";
+import SqlStatistics from "src/type/SqlStatistics";
+import WithLoadingState from "src/type/WithLoadingState";
+import CustomError from "src/util/CustomError";
+import UtilDate from "src/util/UtilDate";
 
 interface WidgetData {
 	project: WithLoadingState<Project>;
@@ -33,6 +38,7 @@ interface WidgetData {
 	sqlErrorList: WithLoadingState<SqlStatistics[]>;
 	todayActiveUserList: WithLoadingState<ActiveUserList>;
 	yesaterdayActiveUserList: WithLoadingState<ActiveUserList>;
+	tpsList: WithLoadingState<DateStatics<number>[]>;
 }
 
 export const WidgetDataContext = createContext<WidgetData>({
@@ -41,6 +47,7 @@ export const WidgetDataContext = createContext<WidgetData>({
 	sqlErrorList: INITIAL_SQL_ERROR_LIST,
 	todayActiveUserList: INITIAL_ACTIVATE_USER_LIST,
 	yesaterdayActiveUserList: INITIAL_ACTIVATE_USER_LIST,
+	tpsList: INITIAL_TPS_LIST,
 });
 
 export default function WidgetDataProvider({
@@ -71,6 +78,9 @@ export default function WidgetDataProvider({
 	const [yesaterdayActiveUserList, setYesaterdayActiveUserList] = useState<
 		WithLoadingState<ActiveUserList>
 	>(INITIAL_ACTIVATE_USER_LIST);
+
+	const [tpsList, setTpsList] =
+		useState<WithLoadingState<DateStatics<number>[]>>(INITIAL_TPS_LIST);
 
 	const changeState = (key: ApiQueueItemType, nextState: LoadingState) => {
 		switch (key) {
@@ -105,6 +115,14 @@ export default function WidgetDataProvider({
 
 			case "YESTERDAY_ACTIVATE_USER": {
 				setYesaterdayActiveUserList((prevState) => ({
+					data: prevState?.data ?? [],
+					state: nextState,
+				}));
+				break;
+			}
+
+			case "TPS": {
+				setTpsList((prevState) => ({
 					data: prevState?.data ?? [],
 					state: nextState,
 				}));
@@ -208,9 +226,38 @@ export default function WidgetDataProvider({
 						});
 						break;
 					}
+
+					case "TPS": {
+						const lastTpsItem = tpsList.data[tpsList.data.length - 1];
+						const noTpsItemStartDate = dayjs()
+							.add(CALL_BIAS_SECONDS, "seconds")
+							.toDate();
+
+						const lastTime = lastTpsItem?.date ?? noTpsItemStartDate;
+
+						const nextStime = dayjs(lastTime).add(5, "seconds");
+						const nextEtime = dayjs(nextStime).add(5, "seconds");
+
+						const res = await getTps({
+							stime: nextStime.toDate().getTime(),
+							etime: nextEtime.toDate().getTime(),
+						});
+
+						setTpsList((prevTpsDataList) => ({
+							data: [
+								...prevTpsDataList.data,
+								{ date: nextStime.toDate(), value: res },
+							],
+							state: "success",
+						}));
+
+						break;
+					}
 				}
 			} catch (error) {
 				changeState(type, "error");
+
+				// 재시도한 횟수를 더한 Queue Item으로 등록
 				originApiQueue.unshift({ type, params, retry: (retry ?? 0) + 1 });
 			}
 		};
@@ -238,6 +285,9 @@ export default function WidgetDataProvider({
 				type: "YESTERDAY_ACTIVATE_USER",
 				params: { stime: yesterdayStime, etime: yesterdayEtime },
 			},
+			{
+				type: "TPS",
+			},
 		]);
 
 		originApiQueue.startFlush();
@@ -255,6 +305,7 @@ export default function WidgetDataProvider({
 				sqlErrorList,
 				todayActiveUserList,
 				yesaterdayActiveUserList,
+				tpsList,
 			}}
 		>
 			<>{children}</>

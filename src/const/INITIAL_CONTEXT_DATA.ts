@@ -2,6 +2,7 @@ import WithLoadingState from "src/type/WithLoadingState";
 import Project from "src/type/Project";
 import SqlStatistics from "src/type/SqlStatistics";
 import ActiveUserList from "src/type/ActiveUserList";
+import DateStatics from "src/type/DateStatics";
 
 export const INITIAL_PROJECT: WithLoadingState<Project> = {
 	state: "idle",
@@ -50,6 +51,11 @@ export const INITIAL_SQL_ERROR_LIST: WithLoadingState<SqlStatistics[]> = {
 };
 
 export const INITIAL_ACTIVATE_USER_LIST: WithLoadingState<ActiveUserList> = {
+	data: [],
+	state: "idle",
+};
+
+export const INITIAL_TPS_LIST: WithLoadingState<DateStatics<number>[]> = {
 	data: [],
 	state: "idle",
 };

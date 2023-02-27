@@ -5,6 +5,7 @@ export type ApiQueueItemType =
 	| "PROJECT_INFO"
 	| "TODAY_ACTIVATE_USER"
 	| "YESTERDAY_ACTIVATE_USER"
+	| "TPS"
 	| "SQL_ERROR"
 	| "AVG_RESPONSE_TIME"
 	| "INFOMATIC";
