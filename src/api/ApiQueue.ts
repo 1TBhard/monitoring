@@ -129,9 +129,7 @@ export class ApiQueue {
 
 		const pushInterval = () => {
 			if (this.isLimitLength()) {
-				throw new CustomError({
-					customErrorMessage: `ApiQueue가 최대 길이 ${this.queueMaxLength}를 벗어남`,
-				});
+				return;
 			}
 
 			this.apiCallList.forEach((apiCall) => {

@@ -5,9 +5,7 @@ import MainLayout from "src/component/common/MainLayout";
 import SqlErrorWidget from "src/component/main/widget/SqlErrorWidget";
 import TpsWidget from "src/component/main/widget/TpsWidget";
 import { memo } from "react";
-// import ActiveUserWidget from "src/component/main/widget/ActiveUserWidget";
-// import AvgResponseTimeWidget from "src/component/main/widget/AvgResponseTimeWidget";
-// import TpsWidget from "src/component/main/widget/TpsWidget";
+import AvgResponseTimeWidget from "src/component/main/widget/AvgResponseTimeWidget";
 
 function DashboardContent({ title }: { title: string }) {
 	return (
@@ -15,10 +13,9 @@ function DashboardContent({ title }: { title: string }) {
 			<Styled.GridFrame>
 				<InfomaticWidget />
 				<SqlErrorWidget />
-				{/* TODO 주석 해제하기 */}
 				<ActiveUserWidget />
 				<TpsWidget />
-				{/*<AvgResponseTimeWidget /> */}
+				<AvgResponseTimeWidget />
 			</Styled.GridFrame>
 		</MainLayout>
 	);
