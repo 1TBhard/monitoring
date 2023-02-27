@@ -16,11 +16,10 @@
   - [주안점](#주안점)
     - [1. 모니터링 서비스로 어떤 것을 사용자에게 제공해야 할까요? 🤔](#1-모니터링-서비스로-어떤-것을-사용자에게-제공해야-할까요-)
     - [2. 컴포넌트 렌더링 최적화 🧹](#2-컴포넌트-렌더링-최적화-)
-      - [2-1. cache를 이용한다](#2-1-cache를-이용한다)
-      - [2-2 데이터와 컴포넌트 로직을 분리한다](#2-2-데이터와-컴포넌트-로직을-분리한다)
+      - [2-1 데이터와 컴포넌트 로직을 분리한다](#2-1-데이터와-컴포넌트-로직을-분리한다)
     - [3. 유지보수에 힘쓰기 🤝](#3-유지보수에-힘쓰기-)
     - [4. 리버스 프록시로 CORS 해결 🛠](#4-리버스-프록시로-cors-해결-)
-    - [5. 단발성 호출 api를 이용하여 차트 그리기](#5-단발성-호출-api를-이용하여-차트-그리기)
+    - [5. 단발성 호출 api를 이용하여 차트 그리기 📈](#5-단발성-호출-api를-이용하여-차트-그리기-)
 
 <br/>
 
@@ -171,46 +170,7 @@ util | 유틸리티 관련 함수들이 모인 폴더
 
 아래는 위의 문제에 대해 제가 생각한 해결책입니다.
 
-#### 2-1. cache를 이용한다
-
-데이터의 로직과 캐시를 적절히 이용하는 방법을 생각하였고 `react-query`를 사용하게 되었습니다.  
-`react-query`를 이용하면 stale과 cachetime 설정을 쉽게할 수 있습니다.  
-또한 `useQuery` 같은 hook을 제공하므로 커스텀훅으로 만들어 데이터의 로직을 모듈화하면 컴포넌트의 로직과 분리될 수 있다고 생각였습니다.
-
-```ts
-// src/hook/statistics/useActiveUserByHour.ts
-
-export default function useActiveUserByHour({
-  stime,
-  etime,
-}: UseActiveUserByHourParams) {
-  // staleTime과 cacheTime을 설정하여 캐시의 refresh 주기를 맞춘다.
-  // refetchInterval 로 연속적으로 데이터를 가져온다.
-  // notifyOnChangeProps 이용하여 "data", "error" 값이 이전과 변경된 경우 데이터가 변경됨을 알린다.
-  const { data, isLoading, isError } = useQuery({
-    queryFn: () => getActiveUserByHour({ stime, etime }),
-    queryKey: [QUERY_KEY.PROJECT, QUERY_KEY.ACTIVE_USER, stime, etime],
-    staleTime: QUERY_COMMON.STALE_TIME,
-    cacheTime: QUERY_COMMON.CACHE_TIME,
-    retry: QUERY_COMMON.RETRY,
-    retryDelay: QUERY_COMMON.RETRY_DELAY,
-    refetchInterval: QUERY_COMMON.REFETCH_INTERVAL,
-    notifyOnChangeProps: ["data", "error"],
-  });
-
-  return {
-    activeUserList:
-      data?.data.map((d) => ({
-        date: UtilDate.dateBumberToHHmm(d[0]),
-        activeUser: d[1],
-      })) ?? [],
-    isLoading,
-    isError,
-  };
-}
-```
-
-#### 2-2 데이터와 컴포넌트 로직을 분리한다
+#### 2-1 데이터와 컴포넌트 로직을 분리한다
 
 데이터와 컴포넌트 로직이 하나로 묶여있는 경우, 유지보수가 힘듦을 경험하였습니다.  
 이에 데이터와 컴포넌트 로직을 분리하고자 하였습니다.  
@@ -277,7 +237,7 @@ module.exports = function (app) {
 };
 ```
 
-### 5. 단발성 호출 api를 이용하여 차트 그리기
+### 5. 단발성 호출 api를 이용하여 차트 그리기 📈
 
 차트를 그리기 위해서는 데이터 리스트들이 필요합니다.
 
