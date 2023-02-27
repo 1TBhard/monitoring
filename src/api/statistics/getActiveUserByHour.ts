@@ -1,7 +1,7 @@
 import openWhatapAPI from "src/api/openWhatapAPI";
 import { API_URL } from "src/const/API_URL";
 
-interface GetActiveUserByHourParams {
+export interface GetActiveUserByHourParams {
 	stime: number;
 	etime: number;
 }

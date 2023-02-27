@@ -1,7 +1,7 @@
 import openWhatapAPI from "src/api/openWhatapAPI";
 import { API_URL } from "src/const/API_URL";
 
-interface GetTpsParams {
+export interface GetTpsParams {
 	stime: number;
 	etime: number;
 }

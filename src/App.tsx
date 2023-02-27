@@ -1,17 +1,14 @@
 import Dashboard from "src/page/Dashboard";
 import ThemeProvider from "src/component/main/ThemeProvider";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "src/hook/store";
+import WidgetDataProvider from "src/context/WidgetDataProvider";
 import "src/util/setTimezone";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 function App() {
 	return (
 		<ThemeProvider>
-			<QueryClientProvider client={queryClient}>
+			<WidgetDataProvider>
 				<Dashboard />
-				<ReactQueryDevtools initialIsOpen={false} />
-			</QueryClientProvider>
+			</WidgetDataProvider>
 		</ThemeProvider>
 	);
 }
