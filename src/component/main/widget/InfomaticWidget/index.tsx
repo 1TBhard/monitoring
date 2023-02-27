@@ -1,6 +1,6 @@
 import InfomaticWidgetContent from "src/component/main/widget/InfomaticWidget/InfomaticWidgetContent";
 import Widget from "src/component/common/Widget";
-import { WidgetDataContext } from "src/hook/WidgetDataProvider";
+import { WidgetDataContext } from "src/context/WidgetDataProvider";
 import * as Styled from "./Styled.InfomaticWidget";
 
 export default function InfomaticWidget() {

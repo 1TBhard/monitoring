@@ -1,5 +1,5 @@
 import DashboardContent from "src/page/Dashboard/DashboardContent";
-import { WidgetDataContext } from "src/hook/WidgetDataProvider";
+import { WidgetDataContext } from "src/context/WidgetDataProvider";
 
 export default function Dashboard() {
 	return (

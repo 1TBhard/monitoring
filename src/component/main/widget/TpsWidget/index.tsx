@@ -1,7 +1,7 @@
 import TpsDescription from "src/component/main/widget/TpsWidget/TpsDescription";
 import TpsAreaChart from "src/component/main/widget/TpsWidget/TpsAreaChart";
 import Widget from "src/component/common/Widget";
-import { WidgetDataContext } from "src/hook/WidgetDataProvider";
+import { WidgetDataContext } from "src/context/WidgetDataProvider";
 
 export default function TpsWidget() {
 	return (

@@ -4,7 +4,7 @@ import SqlErrorDetailDrawer from "src/component/main/widget/SqlErrorWidget/SqlEr
 import Widget from "src/component/common/Widget";
 import { DESCRIPTION } from "src/const/MESSAGE";
 import { useCallback, useState } from "react";
-import { WidgetDataContext } from "src/hook/WidgetDataProvider";
+import { WidgetDataContext } from "src/context/WidgetDataProvider";
 import { TOP_SQL_ERROR_NUMBER } from "src/const/STATISTICS";
 
 export default function SqlErrorWidget() {

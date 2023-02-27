@@ -1,6 +1,6 @@
 import Dashboard from "src/page/Dashboard";
 import ThemeProvider from "src/component/main/ThemeProvider";
-import WidgetDataProvider from "src/hook/WidgetDataProvider";
+import WidgetDataProvider from "src/context/WidgetDataProvider";
 import "src/util/setTimezone";
 
 function App() {

@@ -1,7 +1,7 @@
 import Widget from "src/component/common/Widget";
 import AvgResponseTimeDescription from "src/component/main/widget/AvgResponseTimeWidget/AvgResponseTimeDescription";
 import AvgResponseTimeAreaChart from "src/component/main/widget/AvgResponseTimeWidget/AvgResponseTimeAreaChart";
-import { WidgetDataContext } from "src/hook/WidgetDataProvider";
+import { WidgetDataContext } from "src/context/WidgetDataProvider";
 
 export default function AvgResponseTimeWidget() {
 	return (

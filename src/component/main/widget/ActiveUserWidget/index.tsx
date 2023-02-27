@@ -1,6 +1,6 @@
 import Widget from "src/component/common/Widget";
 import ActiveUserWidgetContent from "src/component/main/widget/ActiveUserWidget/ActiveUserWidgetContent";
-import { WidgetDataContext } from "src/hook/WidgetDataProvider";
+import { WidgetDataContext } from "src/context/WidgetDataProvider";
 
 export default function ActiveUserWidget() {
 	return (
