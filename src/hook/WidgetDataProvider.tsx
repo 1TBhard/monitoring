@@ -17,7 +17,10 @@ import {
 	INITIAL_SQL_ERROR_LIST,
 	INITIAL_TPS_LIST,
 } from "src/const/INITIAL_CONTEXT_DATA";
-import { CALL_BIAS_SECONDS } from "src/const/STATISTICS";
+import {
+	AVG_RESPONSE_TIME_CAHRT,
+	CALL_BIAS_SECONDS,
+} from "src/const/STATISTICS";
 import ActiveUserList from "src/type/ActiveUserList";
 import DateStatics from "src/type/DateStatics";
 import LoadingState from "src/type/LoadingState";
@@ -247,7 +250,13 @@ export default function WidgetDataProvider({
 							data: [
 								...prevTpsDataList.data,
 								{ date: nextStime.toDate(), value: res },
-							],
+							].slice(
+								AVG_RESPONSE_TIME_CAHRT.MAX_DATA_NUMBER <
+									prevTpsDataList.data.length
+									? prevTpsDataList.data.length -
+											AVG_RESPONSE_TIME_CAHRT.MAX_DATA_NUMBER
+									: 0
+							),
 							state: "success",
 						}));
 
