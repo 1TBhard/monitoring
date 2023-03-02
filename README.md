@@ -78,8 +78,8 @@ yarn start
 
 ### 2주차 피드백
 
-- [ ] API 동시호출을 제한해주세요.
-  - [ ] React-query를 제거해주세요.
+- [x] API 동시호출을 제한해주세요.
+  - [x] React-query를 제거해주세요.
 
 <br/>
 
